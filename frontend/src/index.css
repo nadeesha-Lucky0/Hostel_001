@@ -342,7 +342,7 @@
             @apply grid grid-cols-2 gap-3 p-4;
         }
         .filter-bar .form-group {
-            @apply min-w-0 !important flex flex-col justify-end;
+            @apply min-w-0 flex flex-col justify-end !important;
             flex: 1 1 0; /* Force equal width in grid/flex */
         }
         .filter-bar .form-group:last-child {
