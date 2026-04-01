@@ -158,15 +158,15 @@ const StudentNavigationBar = () => {
                     <div className="mobile-menu-overlay" onClick={() => setIsMenuOpen(false)} />
                     <div className="mobile-menu-drawer">
                         <div className="mobile-menu-header">
-                            <div className="flex items-center gap-3">
-                                <img src={logo} alt="SLIIT" className="h-8 w-auto" />
-                                <span className="text-white font-black tracking-tight">STUDENT MENU</span>
+                            <div>
+                                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-1">MENU</p>
+                                <h3 className="text-xl font-black text-white tracking-tight">Student Portal</h3>
                             </div>
                             <button 
                                 onClick={() => setIsMenuOpen(false)}
-                                className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/60"
+                                className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/60 hover:text-white transition-colors"
                             >
-                                <HiOutlineXMark className="text-xl" />
+                                <HiOutlineXMark className="text-2xl" />
                             </button>
                         </div>
                         
@@ -181,20 +181,36 @@ const StudentNavigationBar = () => {
                                     }
                                 >
                                     <item.icon className="text-xl" />
-                                    <span>{item.label}</span>
+                                    <span className="tracking-wide">{item.label}</span>
                                     {item.badge > 0 && (
-                                        <span className="ml-auto bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full">
+                                        <span className="ml-auto bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full ring-2 ring-primary">
                                             {item.badge}
                                         </span>
                                     )}
                                 </NavLink>
                             ))}
+                        </div>
+
+                        <div className="mobile-user-section">
+                            <div className="mobile-user-card">
+                                <div className="mobile-user-avatar">
+                                    {user?.profilePicture ? (
+                                        <img src={user.profilePicture} alt="User" className="w-full h-full object-cover" />
+                                    ) : (
+                                        (user?.name?.charAt(0) || 'S').toUpperCase()
+                                    )}
+                                </div>
+                                <div className="mobile-user-info">
+                                    <h4>{user?.name || 'Student User'}</h4>
+                                    <p>STUDENT</p>
+                                </div>
+                            </div>
                             
                             <button 
                                 onClick={logout}
-                                className="w-full flex items-center gap-4 p-4 rounded-xl text-rose-400 font-bold hover:bg-rose-500/10 transition-all mt-4"
+                                className="mobile-logout-btn"
                             >
-                                <HiOutlineArrowRightOnRectangle className="text-xl" />
+                                <HiOutlineArrowRightOnRectangle className="text-lg" />
                                 <span>Logout</span>
                             </button>
                         </div>

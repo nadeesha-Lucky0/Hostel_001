@@ -782,34 +782,62 @@
     }
 
     .mobile-menu-drawer {
-        @apply fixed top-0 right-0 h-full w-[280px] z-[101] bg-primary shadow-2xl lg:hidden flex flex-col;
+        @apply fixed top-0 right-0 h-full w-[300px] z-[101] bg-primary shadow-2xl lg:hidden flex flex-col;
         animation: slideInRight 0.3s ease-out;
     }
 
     .dark .mobile-menu-drawer {
-        @apply bg-slate-900 border-l border-slate-800;
+        @apply bg-[#0f172a] border-l border-white/5;
     }
 
     .mobile-menu-header {
-        @apply p-6 border-b border-white/10 flex items-center justify-between;
+        @apply p-8 pb-4 flex items-center justify-between;
     }
 
     .mobile-menu-content {
-        @apply flex-1 overflow-y-auto p-4 space-y-2;
+        @apply flex-1 overflow-y-auto px-4 space-y-1;
     }
 
     .mobile-nav-link {
         @apply flex items-center gap-4 p-4 rounded-xl text-sm font-bold transition-all duration-200;
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, 0.5);
     }
 
     .mobile-nav-link.active {
-        @apply text-slate-900;
-        background: var(--accent);
+        @apply bg-[#FAB95B] text-[#1A3263] shadow-lg shadow-[#FAB95B]/20;
     }
 
     .mobile-nav-link:not(.active):hover {
         @apply bg-white/5 text-white;
+    }
+
+    /* ═══════════ MOBILE USER SECTION ═══════════ */
+    .mobile-user-section {
+        @apply mt-auto p-6 border-t border-white/5 bg-black/10;
+    }
+
+    .mobile-user-card {
+        @apply flex items-center gap-4 mb-6;
+    }
+
+    .mobile-user-avatar {
+        @apply w-12 h-12 rounded-xl bg-[#FAB95B] flex items-center justify-center text-[#1A3263] font-black text-lg overflow-hidden shadow-lg;
+    }
+
+    .mobile-user-info h4 {
+        @apply text-[15px] font-black text-white leading-tight;
+    }
+
+    .mobile-user-info p {
+        @apply text-[10px] font-bold uppercase tracking-widest text-white/40;
+    }
+
+    .mobile-logout-btn {
+        @apply w-full flex items-center justify-center gap-3 p-4 rounded-2xl bg-white/5 text-rose-400 font-extrabold text-sm uppercase tracking-widest transition-all duration-200 border border-white/5;
+    }
+
+    .mobile-logout-btn:hover {
+        @apply bg-rose-500/10 border-rose-500/20 scale-[0.98];
     }
 
     @keyframes slideInRight {
