@@ -335,13 +335,13 @@ const StudentDashboard = () => {
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full -ml-32 -mb-32 blur-3xl" />
 
                 {/* Status Mark - Top Right */}
-                <div className="absolute top-6 right-6 md:top-8 md:right-8 z-20">
-                    <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border shadow-xl backdrop-blur-md ${user.accountStatus?.toLowerCase() === 'verified'
+                <div className="absolute top-3 right-3 md:top-8 md:right-8 z-20">
+                    <div className={`flex items-center gap-1.5 px-3 py-1 md:px-4 md:py-2 rounded-2xl border shadow-xl backdrop-blur-md ${user.accountStatus?.toLowerCase() === 'verified'
                         ? 'bg-emerald-500 text-white border-emerald-400'
                         : 'bg-[#FAB95B] text-[#1A3263] border-amber-300'
                         }`}>
-                        {user.accountStatus?.toLowerCase() === 'verified' ? <HiOutlineCheckBadge className="text-lg" /> : <div className="w-2 h-2 rounded-full bg-[#1A3263] animate-pulse" />}
-                        <span className="text-xs font-black uppercase tracking-wider">{user.accountStatus?.toLowerCase() === 'verified' ? 'VERIFIED' : (user.accountStatus || 'Pending')}</span>
+                        {user.accountStatus?.toLowerCase() === 'verified' ? <HiOutlineCheckBadge className="text-sm md:text-lg" /> : <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#1A3263] animate-pulse" />}
+                        <span className="text-[10px] md:text-xs font-black uppercase tracking-wider">{user.accountStatus?.toLowerCase() === 'verified' ? 'VERIFIED' : (user.accountStatus || 'Pending')}</span>
                     </div>
                 </div>
 
