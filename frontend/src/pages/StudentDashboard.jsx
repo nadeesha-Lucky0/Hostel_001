@@ -334,18 +334,18 @@ const StudentDashboard = () => {
                 <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mt-48 blur-3xl animate-pulse" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full -ml-32 -mb-32 blur-3xl" />
 
-                <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
-                    {/* Status Mark - Top Right */}
-                    <div className="absolute top-6 right-6 md:top-8 md:right-8 z-20">
-                        <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border shadow-xl backdrop-blur-md ${user.accountStatus?.toLowerCase() === 'verified'
-                            ? 'bg-emerald-500 text-white border-emerald-400'
-                            : 'bg-[#FAB95B] text-[#1A3263] border-amber-300'
-                            }`}>
-                            {user.accountStatus?.toLowerCase() === 'verified' ? <HiOutlineCheckBadge className="text-lg" /> : <div className="w-2 h-2 rounded-full bg-[#1A3263] animate-pulse" />}
-                            <span className="text-xs font-black uppercase tracking-wider">{user.accountStatus?.toLowerCase() === 'verified' ? 'VERIFIED' : (user.accountStatus || 'Pending')}</span>
-                        </div>
+                {/* Status Mark - Top Right */}
+                <div className="absolute top-6 right-6 md:top-8 md:right-8 z-20">
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border shadow-xl backdrop-blur-md ${user.accountStatus?.toLowerCase() === 'verified'
+                        ? 'bg-emerald-500 text-white border-emerald-400'
+                        : 'bg-[#FAB95B] text-[#1A3263] border-amber-300'
+                        }`}>
+                        {user.accountStatus?.toLowerCase() === 'verified' ? <HiOutlineCheckBadge className="text-lg" /> : <div className="w-2 h-2 rounded-full bg-[#1A3263] animate-pulse" />}
+                        <span className="text-xs font-black uppercase tracking-wider">{user.accountStatus?.toLowerCase() === 'verified' ? 'VERIFIED' : (user.accountStatus || 'Pending')}</span>
                     </div>
+                </div>
 
+                <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
                     {/* Profile Picture Section */}
                     <div className="relative group/pic">
                         {user.profilePicture ? (
