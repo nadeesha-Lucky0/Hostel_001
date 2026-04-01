@@ -312,11 +312,24 @@
     .form-input,
     .form-select {
         @apply w-full px-4 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 transition-all duration-200;
-        height: 45px !important;
+        height: 48px !important;
         border: 1px solid;
         @apply border-slate-200 dark:border-slate-700;
         border-radius: var(--radius-sm);
         box-sizing: border-box !important;
+        display: block;
+        line-height: normal;
+    }
+
+    input[type="date"].form-input {
+        min-height: 48px !important;
+        -webkit-appearance: none;
+        display: flex;
+        align-items: center;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        @apply dark:filter dark:invert transition-all opacity-50 hover:opacity-100 cursor-pointer;
     }
 
     .form-input::placeholder {
@@ -339,18 +352,18 @@
     
     @media (max-width: 640px) {
         .filter-bar {
-            @apply grid grid-cols-2 gap-3 p-4;
+            @apply grid grid-cols-2 gap-4 p-5 mb-6;
         }
         .filter-bar .form-group {
             @apply min-w-0 flex flex-col justify-end !important;
-            flex: 1 1 0; /* Force equal width in grid/flex */
+            flex: 1 1 0; 
+            margin: 0 !important;
         }
         .filter-bar .form-group:last-child {
-            @apply col-span-2 mt-4 flex gap-2;
+            @apply col-span-2 mt-4 bg-slate-50 dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-100 dark:border-white/5 flex-row gap-2 !important;
         }
         .filter-bar .form-group:last-child button {
-            @apply flex-1;
-            height: 45px;
+            @apply h-[48px] font-black text-xs uppercase tracking-widest flex-1;
         }
     }
 
