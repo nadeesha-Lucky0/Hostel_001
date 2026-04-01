@@ -119,7 +119,7 @@ const ForgotPasswordView = ({ onBack }) => {
                         <HiOutlineEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
                             type="email" required
-                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                             placeholder="name@my.sliit.lk"
                             value={email} onChange={e => setEmail(e.target.value)}
                         />
@@ -128,12 +128,12 @@ const ForgotPasswordView = ({ onBack }) => {
 
                 {/* New Password */}
                 <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">New Password</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">New Password</label>
                     <div className="relative">
                         <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
                             type={showPwd ? 'text' : 'password'} required
-                            className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full pl-11 pr-12 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                             placeholder="Min. 6 characters"
                             value={newPassword} onChange={e => setNewPassword(e.target.value)}
                         />
@@ -145,14 +145,14 @@ const ForgotPasswordView = ({ onBack }) => {
 
                 {/* Confirm Password */}
                 <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Confirm New Password</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Confirm New Password</label>
                     <div className="relative">
                         <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
                             type={showConfirm ? 'text' : 'password'} required
-                            className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full pl-11 pr-12 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                             placeholder="Re-enter new password"
-                            value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                            value={confirmPassword} onChange={setConfirmPassword}
                         />
                         <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors">
                             {showConfirm ? <HiOutlineEyeSlash size={18} /> : <HiOutlineEye size={18} />}
@@ -198,10 +198,10 @@ const ForgotPasswordView = ({ onBack }) => {
 
             <form onSubmit={handleVerifyOtp} className="space-y-4">
                 <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">6-Digit OTP Code</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">6-Digit OTP Code</label>
                     <input
                         type="text" required maxLength={6}
-                        className="w-full px-4 py-4 bg-slate-50 border border-slate-100 rounded-xl text-center text-2xl font-black tracking-[0.5em] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                        className="w-full px-4 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-center text-2xl font-black tracking-[0.5em] text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                         placeholder="• • • • • •"
                         value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     />
@@ -326,7 +326,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
 
-            <div className="relative w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] flex flex-col">
+            <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] flex flex-col border border-slate-200/50 dark:border-white/10">
                 <div className="p-8 overflow-y-auto custom-scrollbar">
 
                     {/* ── Forgot Password view ── */}
@@ -336,8 +336,8 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                         <>
                             <div className="flex justify-between items-center mb-8">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900">{isLogin ? 'Welcome Back' : 'Join SLIIT Kandy'}</h2>
-                                    <p className="text-sm text-slate-500 font-medium">Please enter your details to continue</p>
+                                    <h2 className="text-2xl font-black text-slate-900 dark:text-white">{isLogin ? 'Welcome Back' : 'Join SLIIT Kandy'}</h2>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Please enter your details to continue</p>
                                 </div>
                                 <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                                     <HiOutlineXMark className="text-xl text-slate-400" />
@@ -347,11 +347,11 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 {!isLogin && (
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Full Name</label>
                                         <div className="relative">
                                             <HiOutlineUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                             <input type="text" required
-                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                                 placeholder="Kamal Perera"
                                                 value={formData.name}
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -362,11 +362,11 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
                                 {!isLogin && (
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Phone Number</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Phone Number</label>
                                         <div className="relative">
                                             <HiOutlineUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                             <input type="text" required
-                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                                 placeholder="0712345678"
                                                 value={formData.phoneNumber}
                                                 onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
@@ -377,11 +377,11 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
                                 {!isLogin && (
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Student ID (Matches Email Prefix)</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Student ID (Matches Email Prefix)</label>
                                         <div className="relative">
                                             <HiOutlineUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                             <input type="text" required
-                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                                 placeholder="e.g. IT21000000 or BM21000000"
                                                 value={formData.studentId}
                                                 onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
@@ -391,11 +391,11 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                                 )}
 
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Email Address</label>
                                     <div className="relative">
                                         <HiOutlineEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                         <input type="email" required
-                                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                             placeholder="name@my.sliit.lk"
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -404,11 +404,11 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Password</label>
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Password</label>
                                     <div className="relative">
                                         <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                         <input type={showPassword ? 'text' : 'password'} required
-                                            className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full pl-11 pr-12 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                             placeholder="••••••••"
                                             value={formData.password}
                                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -432,11 +432,11 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
                                 {!isLogin && (
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Confirm Password</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Confirm Password</label>
                                         <div className="relative">
                                             <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                             <input type={showConfirmPassword ? 'text' : 'password'} required
-                                                className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                                className="w-full pl-11 pr-12 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                                 placeholder="••••••••"
                                                 value={formData.confirmPassword}
                                                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
