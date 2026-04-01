@@ -19,6 +19,8 @@ const navItems = [
 export default function NavigationBar() {
     const location = useLocation()
     const { logout, user } = useAuth()
+    const [lastScrollY, setLastScrollY] = useState(0)
+    const [isVisible, setIsVisible] = useState(true)
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light')
     const [unreadCount, setUnreadCount] = useState(0)
     const [isScrolled, setIsScrolled] = useState(false)
@@ -51,10 +53,25 @@ export default function NavigationBar() {
     }, [])
 
     useEffect(() => {
-        const handleScroll = () => setIsScrolled(window.scrollY > 10)
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY
+            
+            // Background blur/scrolled state
+            setIsScrolled(currentScrollY > 10)
+            
+            // Hiding logic: hide when scrolling down (> 100px), show when scrolling up
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                setIsVisible(false)
+            } else {
+                setIsVisible(true)
+            }
+            
+            setLastScrollY(currentScrollY)
+        }
+        
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
-    }, [])
+    }, [lastScrollY])
 
     useEffect(() => {
         if (theme === 'dark') {
@@ -81,7 +98,7 @@ export default function NavigationBar() {
     ]
 
     return (
-        <header className={`nav-bar ${isScrolled ? 'scrolled' : ''}`}>
+        <header className={`nav-bar ${isScrolled ? 'scrolled' : ''} ${!isVisible ? 'hidden-nav' : ''}`}>
             <div className="nav-container">
                 <div className="nav-logo-section">
                     <img src={logo} alt="SLIIT Logo" className="nav-logo-img" />
