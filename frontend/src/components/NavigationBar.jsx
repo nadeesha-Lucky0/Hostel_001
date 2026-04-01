@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { HiOutlineHome, HiOutlineBuildingOffice2, HiOutlineUserGroup, HiOutlineClipboardDocumentList, HiOutlineDocumentChartBar, HiOutlineMoon, HiOutlineSun, HiOutlineChatBubbleLeftRight, HiOutlineMegaphone, HiOutlineUser, HiOutlineCube, HiOutlineArrowRightOnRectangle, HiOutlineArrowsRightLeft, HiOutlineCog6Tooth } from 'react-icons/hi2'
+import { HiOutlineHome, HiOutlineBuildingOffice2, HiOutlineUserGroup, HiOutlineClipboardDocumentList, HiOutlineDocumentChartBar, HiOutlineMoon, HiOutlineSun, HiOutlineChatBubbleLeftRight, HiOutlineMegaphone, HiOutlineUser, HiOutlineCube, HiOutlineArrowRightOnRectangle, HiOutlineArrowsRightLeft, HiOutlineCog6Tooth, HiOutlineBars3, HiOutlineXMark } from 'react-icons/hi2'
 import logo from '../assets/idHsN22NWk_logos.png'
 import { useAuth } from '../context/AuthContext'
 
@@ -22,6 +22,7 @@ export default function NavigationBar() {
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light')
     const [unreadCount, setUnreadCount] = useState(0)
     const [isScrolled, setIsScrolled] = useState(false)
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
 
     useEffect(() => {
         const fetchUnread = async () => {
@@ -118,14 +119,71 @@ export default function NavigationBar() {
                         {theme === 'light' ? <HiOutlineMoon /> : <HiOutlineSun />}
                     </button>
                     <button 
+                        onClick={() => setIsMenuOpen(true)}
+                        className="theme-toggle lg:hidden"
+                        title="Open Menu"
+                    >
+                        <HiOutlineBars3 />
+                    </button>
+                    <button 
                         onClick={logout} 
-                        className="p-2 text-white/60 hover:text-rose-400 transition-colors" 
+                        className="p-2 text-white/60 hover:text-rose-400 transition-colors hidden sm:block" 
                         title="Logout"
                     >
                         <HiOutlineArrowRightOnRectangle className="text-xl" />
                     </button>
                 </div>
             </div>
+
+            {/* Mobile Menu Drawer */}
+            {isMenuOpen && (
+                <>
+                    <div className="mobile-menu-overlay" onClick={() => setIsMenuOpen(false)} />
+                    <div className="mobile-menu-drawer">
+                        <div className="mobile-menu-header">
+                            <div className="flex items-center gap-3">
+                                <img src={logo} alt="SLIIT" className="h-8 w-auto" />
+                                <span className="text-white font-black tracking-tight">MENU</span>
+                            </div>
+                            <button 
+                                onClick={() => setIsMenuOpen(false)}
+                                className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/60"
+                            >
+                                <HiOutlineXMark className="text-xl" />
+                            </button>
+                        </div>
+                        
+                        <div className="mobile-menu-content">
+                            {updatedNavItems.map(item => (
+                                <NavLink
+                                    key={item.to}
+                                    to={item.to}
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className={({ isActive }) => 
+                                        `mobile-nav-link ${isActive ? 'active' : ''}`
+                                    }
+                                >
+                                    <item.icon className="text-xl" />
+                                    <span>{item.label}</span>
+                                    {item.badge > 0 && (
+                                        <span className="ml-auto bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full">
+                                            {item.badge}
+                                        </span>
+                                    )}
+                                </NavLink>
+                            ))}
+                            
+                            <button 
+                                onClick={logout}
+                                className="w-full flex items-center gap-4 p-4 rounded-xl text-rose-400 font-bold hover:bg-rose-500/10 transition-all mt-4"
+                            >
+                                <HiOutlineArrowRightOnRectangle className="text-xl" />
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
         </header>
     )
 }
