@@ -127,7 +127,11 @@ export default function AdminNavigationBar() {
                         <div className="mobile-user-section">
                             <div className="mobile-user-card">
                                 <div className="mobile-user-avatar">
-                                    {(user?.name?.charAt(0) || 'A').toUpperCase()}
+                                    {user?.profilePicture ? (
+                                        <img src={user.profilePicture} alt="User" style={{width:'100%',height:'100%',objectFit:'cover'}} />
+                                    ) : (
+                                        (user?.name?.charAt(0) || 'A').toUpperCase()
+                                    )}
                                 </div>
                                 <div className="mobile-user-info">
                                     <h4>{user?.name || 'Admin User'}</h4>

@@ -209,7 +209,7 @@ const StudentNavigationBar = () => {
                             <div className="mobile-user-card">
                                 <div className="mobile-user-avatar">
                                     {user?.profilePicture ? (
-                                        <img src={user.profilePicture} alt="User" className="w-full h-full object-cover" />
+                                        <img src={user.profilePicture} alt="User" style={{width:'100%',height:'100%',objectFit:'cover'}} />
                                     ) : (
                                         (user?.name?.charAt(0) || 'S').toUpperCase()
                                     )}

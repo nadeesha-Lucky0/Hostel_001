@@ -131,7 +131,11 @@ export default function FinancialNavigationBar() {
                         <div className="mobile-user-section">
                             <div className="mobile-user-card">
                                 <div className="mobile-user-avatar">
-                                    {(user?.name?.charAt(0) || 'F').toUpperCase()}
+                                    {user?.profilePicture ? (
+                                        <img src={user.profilePicture} alt="User" style={{width:'100%',height:'100%',objectFit:'cover'}} />
+                                    ) : (
+                                        (user?.name?.charAt(0) || 'F').toUpperCase()
+                                    )}
                                 </div>
                                 <div className="mobile-user-info">
                                     <h4>{user?.name || 'Financial User'}</h4>

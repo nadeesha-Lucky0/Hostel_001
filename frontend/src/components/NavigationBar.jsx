@@ -191,7 +191,11 @@ export default function NavigationBar() {
                         <div className="mobile-user-section">
                             <div className="mobile-user-card">
                                 <div className="mobile-user-avatar">
-                                    {(user?.name?.charAt(0) || 'W').toUpperCase()}
+                                    {user?.profilePicture ? (
+                                        <img src={user.profilePicture} alt="User" style={{width:'100%',height:'100%',objectFit:'cover'}} />
+                                    ) : (
+                                        (user?.name?.charAt(0) || 'W').toUpperCase()
+                                    )}
                                 </div>
                                 <div className="mobile-user-info">
                                     <h4>{user?.name || 'Warden User'}</h4>
