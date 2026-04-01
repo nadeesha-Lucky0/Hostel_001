@@ -176,6 +176,7 @@ export default function NavigationBar() {
                                     className={({ isActive }) => 
                                         `mobile-nav-link ${isActive ? 'active' : ''}`
                                     }
+                                    end
                                 >
                                     <item.icon className="text-xl" />
                                     <span className="tracking-wide">{item.label}</span>
