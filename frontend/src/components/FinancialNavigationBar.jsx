@@ -104,14 +104,11 @@ export default function FinancialNavigationBar() {
                     <div className="mobile-menu-drawer">
                         <div className="mobile-menu-header">
                             <div>
-                                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-1">MENU</p>
-                                <h3 className="text-xl font-black text-white tracking-tight">Financial Portal</h3>
+                                <p>MENU</p>
+                                <h3>Financial Portal</h3>
                             </div>
-                            <button 
-                                onClick={() => setIsMenuOpen(false)}
-                                className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/60 hover:text-white transition-colors"
-                            >
-                                <HiOutlineXMark className="text-2xl" />
+                            <button onClick={() => setIsMenuOpen(false)}>
+                                <HiOutlineXMark className="text-xl" />
                             </button>
                         </div>
                         
