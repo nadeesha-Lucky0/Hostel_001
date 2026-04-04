@@ -11,15 +11,16 @@ const sendEmail = async ({ email, subject, message }) => {
         return { success: false, error: `Missing environment variables: ${missing.join(', ')}` };
     }
 
+    const port = Number(process.env.SMTP_PORT);
     const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT),
-        secure: false, // true for 465, false for other ports
+        port: port,
+        secure: port === 465, // Automatically use SSL if port is 465
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,
         },
-        connectionTimeout: 10000, // 10 seconds timeout
+        connectionTimeout: 10000, 
         greetingTimeout: 10000,
         socketTimeout: 10000,
     });
