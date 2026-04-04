@@ -374,49 +374,61 @@ const verifyPhoneUpdateOTP = async (req, res) => {
 // @desc   Debug: Check Brevo API Key validity
 // @route  GET /api/auth/debug-email-key
 const debugEmailKey = async (req, res) => {
-    try {
-        const apiKey = (process.env.SMTP_PASS || '').trim();
-        if (!apiKey) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'SMTP_PASS (API Key) is missing in environment variables.' 
-            });
-        }
+    const apiKey = (process.env.SMTP_PASS || '').trim();
+    const results = {
+        keyInfo: { 
+            length: apiKey.length, 
+            masked: `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` 
+        },
+        global: { tested: false },
+        middleEast: { tested: false }
+    };
 
-        console.log(`[Debug] Checking Brevo API Key: ${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)} (Length: ${apiKey.length})`);
-
-        const response = await fetch('https://api.brevo.com/v3/account', {
-            method: 'GET',
-            headers: {
-                'accept': 'application/json',
-                'api-key': apiKey,
-                'x-sib-api-key': apiKey
-            }
-        });
-
-        const responseAlt = await fetch('https://api-me.brevo.com/v3/account', {
-            method: 'GET',
-            headers: {
-                'accept': 'application/json',
-                'api-key': apiKey,
-                'x-sib-api-key': apiKey
-            }
-        });
-        const dataAlt = await responseAlt.json();
-        
-        res.json({
-            success: response.ok || responseAlt.ok,
-            globalStatus: response.status,
-            meStatus: responseAlt.status,
-            maskedKey: `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`,
-            keyLength: apiKey.length,
-            globalResponse: data,
-            meResponse: dataAlt
-        });
-    } catch (err) {
-        console.error('[Debug] Error verifying API key:', err);
-        res.status(500).json({ success: false, message: err.message });
+    if (!apiKey) {
+        return res.status(400).json({ success: false, message: 'SMTP_PASS missing' });
     }
+
+    // Test Global
+    try {
+        const resp = await fetch('https://api.brevo.com/v3/account', {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json',
+                'api-key': apiKey,
+                'x-sib-api-key': apiKey
+            }
+        });
+        results.global = { 
+            tested: true,
+            status: resp.status, 
+            ok: resp.ok,
+            data: await resp.json() 
+        };
+    } catch (e) {
+        results.global = { tested: true, error: e.message, code: e.code };
+    }
+
+    // Test Middle East
+    try {
+        const respAlt = await fetch('https://api-me.brevo.com/v3/account', {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json',
+                'api-key': apiKey,
+                'x-sib-api-key': apiKey
+            }
+        });
+        results.middleEast = { 
+            tested: true,
+            status: respAlt.status, 
+            ok: respAlt.ok,
+            data: await respAlt.json() 
+        };
+    } catch (e) {
+        results.middleEast = { tested: true, error: e.message, code: e.code };
+    }
+
+    res.json(results);
 };
 
 module.exports = { 
