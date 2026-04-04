@@ -26,7 +26,8 @@ const sendEmail = async ({ email, subject, message }) => {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'api-key': apiKey, // Your Brevo API key
+                'api-key': apiKey,
+                'x-sib-api-key': apiKey,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({

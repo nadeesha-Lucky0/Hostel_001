@@ -389,7 +389,8 @@ const debugEmailKey = async (req, res) => {
             method: 'GET',
             headers: {
                 'accept': 'application/json',
-                'api-key': apiKey
+                'api-key': apiKey,
+                'x-sib-api-key': apiKey
             }
         });
 
