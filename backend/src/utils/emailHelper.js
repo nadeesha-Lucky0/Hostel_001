@@ -2,15 +2,13 @@
 const https = require('https');
 
 /**
- * Sends an email using Brevo's HTTP API (v3) via native Node.js 'https' module.
- * This is the most robust way to ensure headers are sent correctly to bypass cloud network issues.
+ * Sends an email using Brevo's HTTP API (v3).
+ * Uses native Node.js 'https' for reliable cloud deployment.
  */
 const sendEmail = async ({ email, subject, message }) => {
-    console.log(`[EmailHelper] Sending email via native HTTPS to: ${email}`);
-    
     if (!process.env.SMTP_PASS || !process.env.EMAIL_FROM) {
-        console.error('[EmailHelper] Missing SMTP_PASS or EMAIL_FROM.');
-        return { success: false, error: 'Internal configuration error: Missing API Key' };
+        console.error('[EmailHelper] Missing SMTP_PASS or EMAIL_FROM environment variables.');
+        return { success: false, error: 'Email configuration error' };
     }
 
     const apiKey = process.env.SMTP_PASS.trim();
@@ -34,8 +32,6 @@ const sendEmail = async ({ email, subject, message }) => {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'api-key': apiKey,
-                'x-sib-api-key': apiKey,
-                'x-api-key': apiKey,
                 'Content-Length': Buffer.byteLength(payload)
             }
         };
@@ -47,24 +43,22 @@ const sendEmail = async ({ email, subject, message }) => {
                 try {
                     const parsedData = JSON.parse(responseData);
                     if (res.statusCode >= 200 && res.statusCode < 300) {
-                        console.log('[EmailHelper] SUCCESS:', parsedData.messageId || 'Sent');
                         resolve({ success: true });
                     } else {
-                        console.error('[EmailHelper] API ERROR:', parsedData);
+                        console.error('[EmailHelper] API Error:', parsedData);
                         resolve({ 
                             success: false, 
                             error: `API ${res.statusCode}: ${parsedData.message || 'Unknown error'}` 
                         });
                     }
                 } catch (e) {
-                    console.error('[EmailHelper] JSON PARSE ERROR:', responseData);
-                    resolve({ success: false, error: 'Malformed response from Brevo' });
+                    resolve({ success: false, error: 'Malformed response from email server' });
                 }
             });
         });
 
         req.on('error', (error) => {
-            console.error('[EmailHelper] NETWORK ERROR:', error);
+            console.error('[EmailHelper] Network error:', error.message);
             resolve({ success: false, error: `Network error: ${error.message}` });
         });
 

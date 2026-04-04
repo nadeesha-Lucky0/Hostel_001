@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User.js');
-const https = require('https');
 
 // In-memory OTP store: { email -> { otp, newPassword, expiresAt } }
 const otpStore = new Map();
@@ -372,60 +371,6 @@ const verifyPhoneUpdateOTP = async (req, res) => {
     }
 };
 
-// Helper for debugEmailKey using native https
-const makeHttpsRequest = (options, payload = null) => {
-    return new Promise((resolve) => {
-        const req = https.request(options, (res) => {
-            let data = '';
-            res.on('data', (chunk) => { data += chunk; });
-            res.on('end', () => {
-                try {
-                    const parsed = JSON.parse(data);
-                    resolve({ status: res.statusCode, ok: res.statusCode >= 200 && res.statusCode < 300, data: parsed });
-                } catch (e) {
-                    resolve({ status: res.statusCode, ok: false, data: { message: 'Raw Response', raw: data } });
-                }
-            });
-        });
-        req.on('error', (e) => resolve({ ok: false, error: e.message, code: e.code }));
-        if (payload) req.write(payload);
-        req.end();
-    });
-};
-
-// @desc   Debug: Check Brevo API Key validity using RAW HTTPS
-// @route  GET /api/auth/debug-email-key
-const debugEmailKey = async (req, res) => {
-    const apiKey = (process.env.SMTP_PASS || '').trim();
-    const results = {
-        keyInfo: { 
-            length: apiKey.length, 
-            masked: `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` 
-        },
-        global: { tested: false }
-    };
-
-    if (!apiKey) {
-        return res.status(400).json({ success: false, message: 'SMTP_PASS missing' });
-    }
-
-    const headers = {
-        'Accept': 'application/json',
-        'api-key': apiKey,
-        'x-sib-api-key': apiKey,
-        'x-api-key': apiKey
-    };
-
-    results.global = await makeHttpsRequest({
-        hostname: 'api.brevo.com',
-        path: '/v3/account',
-        method: 'GET',
-        headers
-    });
-
-    res.json(results);
-};
-
 module.exports = { 
     register, 
     login, 
@@ -435,6 +380,5 @@ module.exports = {
     requestPhoneUpdateOTP, 
     verifyPhoneUpdateOTP,
     sendSignupOTP,
-    verifySignupOTP,
-    debugEmailKey
+    verifySignupOTP
 };
