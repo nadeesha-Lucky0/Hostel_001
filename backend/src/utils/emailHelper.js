@@ -20,9 +20,13 @@ const sendEmail = async ({ email, subject, message }) => {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,
         },
-        connectionTimeout: 10000, 
-        greetingTimeout: 10000,
-        socketTimeout: 10000,
+        tls: {
+            // Do not fail on invalid certificates (helpful for some cloud environments)
+            rejectUnauthorized: false
+        },
+        connectionTimeout: 30000, // Increased to 30 seconds
+        greetingTimeout: 30000,
+        socketTimeout: 30000,
     });
 
     const mailOptions = {
