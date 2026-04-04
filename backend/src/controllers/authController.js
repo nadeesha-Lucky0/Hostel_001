@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User.js');
+const https = require('https');
 
 // In-memory OTP store: { email -> { otp, newPassword, expiresAt } }
 const otpStore = new Map();
@@ -371,7 +372,28 @@ const verifyPhoneUpdateOTP = async (req, res) => {
     }
 };
 
-// @desc   Debug: Check Brevo API Key validity
+// Helper for debugEmailKey using native https
+const makeHttpsRequest = (options, payload = null) => {
+    return new Promise((resolve) => {
+        const req = https.request(options, (res) => {
+            let data = '';
+            res.on('data', (chunk) => { data += chunk; });
+            res.on('end', () => {
+                try {
+                    const parsed = JSON.parse(data);
+                    resolve({ status: res.statusCode, ok: res.statusCode >= 200 && res.statusCode < 300, data: parsed });
+                } catch (e) {
+                    resolve({ status: res.statusCode, ok: false, data: { message: 'Raw Response', raw: data } });
+                }
+            });
+        });
+        req.on('error', (e) => resolve({ ok: false, error: e.message, code: e.code }));
+        if (payload) req.write(payload);
+        req.end();
+    });
+};
+
+// @desc   Debug: Check Brevo API Key validity using RAW HTTPS
 // @route  GET /api/auth/debug-email-key
 const debugEmailKey = async (req, res) => {
     const apiKey = (process.env.SMTP_PASS || '').trim();
@@ -380,53 +402,26 @@ const debugEmailKey = async (req, res) => {
             length: apiKey.length, 
             masked: `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` 
         },
-        global: { tested: false },
-        middleEast: { tested: false }
+        global: { tested: false }
     };
 
     if (!apiKey) {
         return res.status(400).json({ success: false, message: 'SMTP_PASS missing' });
     }
 
-    // Test Global
-    try {
-        const resp = await fetch('https://api.brevo.com/v3/account', {
-            method: 'GET',
-            headers: {
-                'accept': 'application/json',
-                'api-key': apiKey,
-                'x-sib-api-key': apiKey
-            }
-        });
-        results.global = { 
-            tested: true,
-            status: resp.status, 
-            ok: resp.ok,
-            data: await resp.json() 
-        };
-    } catch (e) {
-        results.global = { tested: true, error: e.message, code: e.code };
-    }
+    const headers = {
+        'Accept': 'application/json',
+        'api-key': apiKey,
+        'x-sib-api-key': apiKey,
+        'x-api-key': apiKey
+    };
 
-    // Test Middle East
-    try {
-        const respAlt = await fetch('https://api-me.brevo.com/v3/account', {
-            method: 'GET',
-            headers: {
-                'accept': 'application/json',
-                'api-key': apiKey,
-                'x-sib-api-key': apiKey
-            }
-        });
-        results.middleEast = { 
-            tested: true,
-            status: respAlt.status, 
-            ok: respAlt.ok,
-            data: await respAlt.json() 
-        };
-    } catch (e) {
-        results.middleEast = { tested: true, error: e.message, code: e.code };
-    }
+    results.global = await makeHttpsRequest({
+        hostname: 'api.brevo.com',
+        path: '/v3/account',
+        method: 'GET',
+        headers
+    });
 
     res.json(results);
 };
