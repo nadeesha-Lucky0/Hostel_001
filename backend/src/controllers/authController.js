@@ -371,6 +371,43 @@ const verifyPhoneUpdateOTP = async (req, res) => {
     }
 };
 
+// @desc   Debug: Check Brevo API Key validity
+// @route  GET /api/auth/debug-email-key
+const debugEmailKey = async (req, res) => {
+    try {
+        const apiKey = (process.env.SMTP_PASS || '').trim();
+        if (!apiKey) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'SMTP_PASS (API Key) is missing in environment variables.' 
+            });
+        }
+
+        console.log(`[Debug] Checking Brevo API Key: ${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)} (Length: ${apiKey.length})`);
+
+        const response = await fetch('https://api.brevo.com/v3/account', {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json',
+                'api-key': apiKey
+            }
+        });
+
+        const data = await response.json();
+        
+        res.json({
+            success: response.ok,
+            status: response.status,
+            maskedKey: `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`,
+            keyLength: apiKey.length,
+            brevoResponse: data
+        });
+    } catch (err) {
+        console.error('[Debug] Error verifying API key:', err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
 module.exports = { 
     register, 
     login, 
@@ -380,5 +417,6 @@ module.exports = {
     requestPhoneUpdateOTP, 
     verifyPhoneUpdateOTP,
     sendSignupOTP,
-    verifySignupOTP
+    verifySignupOTP,
+    debugEmailKey
 };

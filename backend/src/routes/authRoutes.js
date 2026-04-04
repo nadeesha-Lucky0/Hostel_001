@@ -1,7 +1,7 @@
 const express = require('express');
 const { 
     register, login, getMe, forgotPassword, resetPassword, 
-    requestPhoneUpdateOTP, verifyPhoneUpdateOTP, sendSignupOTP, verifySignupOTP 
+    requestPhoneUpdateOTP, verifyPhoneUpdateOTP, sendSignupOTP, verifySignupOTP, debugEmailKey 
 } = require('../controllers/authController.js');
 const { protect } = require('../middleware/authMiddleware.js');
 
@@ -26,5 +26,6 @@ router.get('/check-role', protect, (req, res) => {
         }
     });
 });
+router.get('/debug-email-key', debugEmailKey);
 
 module.exports = router;
