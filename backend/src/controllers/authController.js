@@ -79,7 +79,10 @@ const sendSignupOTP = async (req, res) => {
         });
 
         if (!emailResult.success) {
-            return res.status(500).json({ success: false, message: 'Failed to send verification email' });
+            return res.status(500).json({ 
+                success: false, 
+                message: `Failed to send verification email: ${emailResult.error || 'Unknown error'}` 
+            });
         }
 
         res.json({ success: true, message: 'Verification code sent to your email' });
