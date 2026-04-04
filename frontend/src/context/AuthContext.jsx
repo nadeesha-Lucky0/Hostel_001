@@ -15,7 +15,10 @@ export const AuthProvider = ({ children }) => {
         if (token && savedUser) {
             try {
                 const parsedUser = JSON.parse(savedUser);
-                setUser({ ...parsedUser, token });
+                const userObj = { ...parsedUser, token };
+                setUser(userObj);
+                // Background refresh to sync any DB updates (like verified phone)
+                refreshUser(userObj).catch(console.error);
             } catch (err) {
                 sessionStorage.removeItem('hostel_token');
                 sessionStorage.removeItem('hostel_user');

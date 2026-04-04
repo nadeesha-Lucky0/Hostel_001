@@ -221,36 +221,38 @@ const FinancialDashboard = () => {
 
 
 
-            {/* Tab Navigation */}
-            <div className="flex gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-2xl w-full md:w-fit border border-slate-100 dark:border-slate-800 transition-all shadow-sm shadow-slate-200/50">
+            {/* Tab Navigation - Consolidated into one line */}
+            <div className="flex gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-2xl w-full md:w-fit border border-slate-100 dark:border-slate-800 overflow-x-auto scrollbar-hide shadow-sm shadow-slate-200/50">
                 <button
                     onClick={() => { setActiveTab('deposits'); setSelectedClearance(null); }}
-                    className={`flex items-center gap-2 px-8 py-3 rounded-2xl text-xs font-black transition-all ${activeTab === 'deposits' ? 'bg-[#FAB95B] text-[#1A3263] shadow-lg shadow-[#FAB95B]/20 dark:shadow-none translate-y-[-1px]' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                    className={`flex items-center justify-center px-4 sm:px-8 py-2.5 rounded-2xl text-[10px] sm:text-xs font-black transition-all flex-1 md:flex-none whitespace-nowrap ${activeTab === 'deposits' ? 'bg-[#FAB95B] text-[#1A3263] shadow-lg translate-y-[-1px]' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
                 >
-                    <HiOutlineWallet className="text-lg" />
-                    REFUNDABLE PAYMENTS
+                    <div className="flex flex-col leading-tight items-center">
+                        <span>REFUNDABLE</span>
+                        <span>PAYMENTS</span>
+                    </div>
                 </button>
                 <button
                     onClick={() => { setActiveTab('refunds'); setSelectedClearance(null); }}
-                    className={`flex items-center gap-2 px-8 py-3 rounded-2xl text-xs font-black transition-all ${activeTab === 'refunds' ? 'bg-[#FAB95B] text-[#1A3263] shadow-lg shadow-[#FAB95B]/20 dark:shadow-none translate-y-[-1px]' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                    className={`flex items-center justify-center px-4 sm:px-8 py-2.5 rounded-2xl text-[10px] sm:text-xs font-black transition-all flex-1 md:flex-none whitespace-nowrap ${activeTab === 'refunds' ? 'bg-[#FAB95B] text-[#1A3263] shadow-lg translate-y-[-1px]' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
                 >
-                    <HiOutlineDocumentDuplicate className="text-lg" />
-                    CLEARANCE REVIEW
+                    <div className="flex flex-col leading-tight items-center">
+                        <span>CLEARANCE</span>
+                        <span>REVIEW</span>
+                    </div>
                     {clearances.filter(c => c.status === 'Pending' || c.status === 'In Progress').length > 0 && (
                         <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse ml-1" />
                     )}
                 </button>
                 <button
                     onClick={() => { setActiveTab('transfers'); setSelectedClearance(null); }}
-                    className={`flex items-center gap-2 px-8 py-3 rounded-2xl text-xs font-black transition-all ${activeTab === 'transfers' ? 'bg-[#FAB95B] text-[#1A3263] shadow-lg shadow-[#FAB95B]/20 dark:shadow-none translate-y-[-1px]' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                    className={`flex items-center justify-center px-4 sm:px-8 py-2.5 rounded-2xl text-[10px] sm:text-xs font-black transition-all flex-1 md:flex-none whitespace-nowrap ${activeTab === 'transfers' ? 'bg-[#FAB95B] text-[#1A3263] shadow-lg translate-y-[-1px]' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
                 >
-                    <HiOutlineCurrencyDollar className="text-lg" />
-                    REFUND TRANSFERS
+                    <div className="flex flex-col leading-tight items-center">
+                        <span>REFUND</span>
+                        <span>TRANSFERS</span>
+                    </div>
                 </button>
-
-                <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden md:block" />
-
-
             </div>
 
             {/* Filter & Search Bar - Moved Under Tabs */}

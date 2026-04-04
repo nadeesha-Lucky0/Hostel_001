@@ -26,34 +26,27 @@ export default function FloorAndRoomManagement({ allocatingStudent, setAllocatin
                 <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">Manage hostel infrastructure and assign beds to students</p>
             </div>
 
-            {/* Custom Tab Navigation that mimics the style used in Profiles.jsx */}
-            <div className="flex gap-4 border-b border-slate-200 dark:border-slate-700/50 mb-6">
-                <button
-                    onClick={() => {
-                        setActiveTab('rooms')
-                        navigate('.', { replace: true, state: { tab: 'rooms' } })
-                    }}
-                    className={`pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${
-                        activeTab === 'rooms'
-                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                            : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
-                    }`}
-                >
-                    Rooms & Floors
-                </button>
-                <button
-                    onClick={() => {
-                        setActiveTab('allocation')
-                        navigate('.', { replace: true, state: { tab: 'allocation' } })
-                    }}
-                    className={`pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${
-                        activeTab === 'allocation'
-                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                            : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
-                    }`}
-                >
-                    Allocations
-                </button>
+            {/* Standardized Premium Tab Navigation */}
+            <div className="flex flex-wrap gap-2 p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-x-auto no-scrollbar mb-8">
+                {[
+                    { id: 'rooms', label: 'Rooms &\nFloors' },
+                    { id: 'allocation', label: 'Student\nAllocations' }
+                ].map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => {
+                            setActiveTab(tab.id)
+                            navigate('.', { replace: true, state: { tab: tab.id } })
+                        }}
+                        className={`flex-1 min-w-[120px] sm:min-w-[160px] py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 border-none cursor-pointer flex flex-col items-center justify-center text-center leading-tight whitespace-pre-line ${
+                            activeTab === tab.id
+                                ? 'bg-[#FAB95B] text-[#1A3263] shadow-md shadow-[#FAB95B]/20 scale-[1.02]'
+                                : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                        }`}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
             </div>
 
             {/* Tab Content */}

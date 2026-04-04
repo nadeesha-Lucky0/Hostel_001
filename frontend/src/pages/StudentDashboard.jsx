@@ -32,6 +32,7 @@ import {
     HiOutlineDevicePhoneMobile,
     HiOutlineLockClosed,
     HiOutlineCog6Tooth,
+    HiOutlineShieldCheck,
     HiOutlineEye,
     HiOutlineEyeSlash
 } from 'react-icons/hi2';
@@ -661,58 +662,70 @@ const SettingsView = ({ user, onRefresh, myClearance }) => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-sm border border-slate-50 dark:border-slate-800">
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                        <HiOutlineCog6Tooth size={24} />
+        <div className="max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans pb-20">
+            <div className="space-y-10 pt-4">
+                {/* Security Management Sections */}
+                <div className="flex items-center gap-3 mb-2 px-2">
+                    <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-100/50 dark:border-indigo-900/50">
+                        <HiOutlineCog6Tooth size={22} className="animate-spin-slow" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100">Account Settings</h2>
-                        <p className="text-sm text-slate-400 font-medium">Manage your contact info and account security</p>
+                        <h4 className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.25em]">Account Security</h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Protect Your Student Credentials</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* ── Section: Phone Change ── */}
-                    <div className="space-y-6 p-6 bg-slate-50/50 dark:bg-slate-800/30 rounded-3xl border border-slate-100 dark:border-slate-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    {/* ── Section: Phone Number ── */}
+                    <div className="space-y-6 p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 transition-all hover:border-indigo-200 dark:hover:border-indigo-900/50 shadow-sm group">
                         <div className="flex items-center gap-3">
-                            <HiOutlineDevicePhoneMobile className="text-indigo-500 text-lg" />
-                            <h3 className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">Phone Number</h3>
+                            <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl flex items-center justify-center text-indigo-600 transition-colors group-hover:bg-indigo-600 group-hover:text-white">
+                                <HiOutlineDevicePhoneMobile size={20} />
+                            </div>
+                            <h3 className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">Phone Identity</h3>
                         </div>
 
                         {phoneState.step === 'form' && (
-                            <form onSubmit={requestPhoneOTP} className="space-y-4">
+                            <form onSubmit={requestPhoneOTP} className="space-y-5">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">New Phone Number</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                                        {user?.phoneNumber ? 'Update Number' : 'Add Mobile Number'}
+                                    </label>
                                     <input
-                                        type="text" placeholder="e.g. 07XXXXXXXX"
-                                        className="w-full px-5 py-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all font-bold"
-                                        value={phoneState.newPhone} onChange={e => setPhoneState({ ...phoneState, newPhone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                        type="text"
+                                        placeholder="e.g. 07XXXXXXXX"
+                                        className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-bold text-slate-700 dark:text-slate-200"
+                                        value={phoneState.newPhone}
+                                        onChange={e => setPhoneState({ ...phoneState, newPhone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                                     />
+                                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1 px-1">Current: {user?.phoneNumber || 'NONE'}</p>
                                 </div>
-                                <button type="submit" disabled={phoneState.loading} className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm hover:bg-indigo-700 transition-all disabled:opacity-50">
-                                    {phoneState.loading ? 'Sending OTP...' : 'Send OTP to New Phone'}
+                                <button type="submit" disabled={phoneState.loading} className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50">
+                                    {phoneState.loading ? 'Processing...' : 'Request OTP Code'}
                                 </button>
                             </form>
                         )}
 
                         {phoneState.step === 'otp' && (
-                            <form onSubmit={verifyPhoneOTP} className="space-y-4">
-                                <div className="p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100/50">
-                                    <p className="text-xs font-bold text-indigo-600">OTP sent to {phoneState.newPhone}</p>
+                            <form onSubmit={verifyPhoneOTP} className="space-y-5">
+                                <div className="p-4 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100/50">
+                                    <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Verification Sent</p>
+                                    <p className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-0.5">Code sent to {phoneState.newPhone}</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Enter 6-Digit OTP</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">6-Digit Code</label>
                                     <input
-                                        type="text" maxLength={6} placeholder="• • • • • •"
-                                        className="w-full px-5 py-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-center text-xl font-black tracking-widest focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all"
-                                        value={phoneState.otp} onChange={e => setPhoneState({ ...phoneState, otp: e.target.value.replace(/\D/g, '') })}
+                                        type="text"
+                                        maxLength={6}
+                                        placeholder="000 000"
+                                        className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-800 rounded-2xl text-center text-2xl font-black tracking-[0.5em] focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all text-slate-700 dark:text-slate-200"
+                                        value={phoneState.otp}
+                                        onChange={e => setPhoneState({ ...phoneState, otp: e.target.value.replace(/\D/g, '') })}
                                     />
                                 </div>
-                                <div className="flex gap-2">
-                                    <button type="button" onClick={() => setPhoneState({ ...phoneState, step: 'form' })} className="px-6 py-4 bg-slate-100 dark:bg-slate-800 rounded-2xl font-bold text-sm">Back</button>
-                                    <button type="submit" disabled={phoneState.loading} className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm hover:bg-indigo-700 transition-all disabled:opacity-50">
+                                <div className="flex gap-3">
+                                    <button type="button" onClick={() => setPhoneState({ ...phoneState, step: 'form' })} className="px-6 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-black text-[10px] uppercase tracking-widest">Back</button>
+                                    <button type="submit" disabled={phoneState.loading} className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50">
                                         Verify & Update
                                     </button>
                                 </div>
@@ -720,118 +733,137 @@ const SettingsView = ({ user, onRefresh, myClearance }) => {
                         )}
 
                         {phoneState.step === 'success' && (
-                            <div className="text-center py-4 space-y-3">
-                                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl">✓</div>
-                                <p className="text-sm font-bold text-slate-600 dark:text-slate-400">Phone number updated!</p>
-                                <button onClick={() => setPhoneState({ ...phoneState, step: 'form' })} className="text-xs font-black text-indigo-600 uppercase">Change again</button>
+                            <div className="text-center py-6 space-y-4 animate-in zoom-in duration-500">
+                                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-sm">✓</div>
+                                <div>
+                                    <p className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">Identity Updated</p>
+                                    <button onClick={() => setPhoneState({ ...phoneState, step: 'form' })} className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest hover:underline mt-2 bg-transparent uppercase tracking-widest">Restart Flow</button>
+                                </div>
                             </div>
                         )}
                     </div>
 
                     {/* ── Section: Password Change ── */}
-                    <div className="space-y-6 p-6 bg-slate-50/50 dark:bg-slate-800/30 rounded-3xl border border-slate-100 dark:border-slate-800">
+                    <div className="space-y-6 p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 transition-all hover:border-rose-200 dark:hover:border-rose-900/50 shadow-sm group">
                         <div className="flex items-center gap-3">
-                            <HiOutlineLockClosed className="text-rose-500 text-lg" />
-                            <h3 className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">Security</h3>
+                            <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/40 rounded-xl flex items-center justify-center text-rose-600 transition-colors group-hover:bg-rose-600 group-hover:text-white">
+                                <HiOutlineLockClosed size={20} />
+                            </div>
+                            <h3 className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">Password Access</h3>
                         </div>
 
                         {pwdState.step === 'form' && (
-                            <form onSubmit={requestPwdOTP} className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">New Password</label>
-                                    <div className="relative">
-                                        <input
-                                            type={showPwd ? 'text' : 'password'}
-                                            className="w-full px-5 py-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all font-bold"
-                                            value={pwdState.newPwd} onChange={e => setPwdState({ ...pwdState, newPwd: e.target.value })}
-                                        />
-                                        <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                            {showPwd ? <HiOutlineEyeSlash size={18} /> : <HiOutlineEye size={18} />}
-                                        </button>
+                            <form onSubmit={requestPwdOTP} className="space-y-5">
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">New Password</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showPwd ? 'text' : 'password'}
+                                                className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-bold text-slate-700 dark:text-slate-200"
+                                                value={pwdState.newPwd}
+                                                onChange={e => setPwdState({ ...pwdState, newPwd: e.target.value })}
+                                            />
+                                            <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors bg-transparent">
+                                                {showPwd ? <HiOutlineEyeSlash size={18} /> : <HiOutlineEye size={18} />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Confirm Access</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showConfirm ? 'text' : 'password'}
+                                                className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-bold text-slate-700 dark:text-slate-200"
+                                                value={pwdState.confirmPwd}
+                                                onChange={e => setPwdState({ ...pwdState, confirmPwd: e.target.value })}
+                                            />
+                                            <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors bg-transparent">
+                                                {showConfirm ? <HiOutlineEyeSlash size={18} /> : <HiOutlineEye size={18} />}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Confirm Password</label>
-                                    <div className="relative">
-                                        <input
-                                            type={showConfirm ? 'text' : 'password'}
-                                            className="w-full px-5 py-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all font-bold"
-                                            value={pwdState.confirmPwd} onChange={e => setPwdState({ ...pwdState, confirmPwd: e.target.value })}
-                                        />
-                                        <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                            {showConfirm ? <HiOutlineEyeSlash size={18} /> : <HiOutlineEye size={18} />}
-                                        </button>
-                                    </div>
-                                </div>
-                                <button type="submit" disabled={pwdState.loading} className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm hover:bg-indigo-700 transition-all disabled:opacity-50">
-                                    {pwdState.loading ? 'Processing...' : 'Request Password Change'}
+                                <button type="submit" disabled={pwdState.loading} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-600/20 hover:bg-rose-700 active:scale-95 transition-all disabled:opacity-50">
+                                    {pwdState.loading ? 'Requesting...' : 'Authorize Password Reset'}
                                 </button>
                             </form>
                         )}
 
                         {pwdState.step === 'otp' && (
-                            <form onSubmit={verifyPwdOTP} className="space-y-4">
-                                <div className="p-4 bg-rose-50/50 dark:bg-rose-900/10 rounded-2xl border border-rose-100/50">
-                                    <p className="text-xs font-bold text-rose-600">OTP sent to your registered phone</p>
+                            <form onSubmit={verifyPwdOTP} className="space-y-5">
+                                <div className="p-4 bg-rose-50/50 dark:bg-rose-900/20 rounded-2xl border border-rose-100/50">
+                                    <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest">Authorization Required</p>
+                                    <p className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-0.5">Security code sent to your mobile.</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Enter Security Code</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Security Code</label>
                                     <input
-                                        type="text" maxLength={6} placeholder="• • • • • •"
-                                        className="w-full px-5 py-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-center text-xl font-black tracking-widest focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all"
-                                        value={pwdState.otp} onChange={e => setPwdState({ ...pwdState, otp: e.target.value.replace(/\D/g, '') })}
+                                        type="text"
+                                        maxLength={6}
+                                        placeholder="000 000"
+                                        className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-800 rounded-2xl text-center text-2xl font-black tracking-[0.5em] focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all text-slate-700 dark:text-slate-200"
+                                        value={pwdState.otp}
+                                        onChange={e => setPwdState({ ...pwdState, otp: e.target.value.replace(/\D/g, '') })}
                                     />
                                 </div>
-                                <div className="flex gap-2">
-                                    <button type="button" onClick={() => setPwdState({ ...pwdState, step: 'form' })} className="px-6 py-4 bg-slate-100 dark:bg-slate-800 rounded-2xl font-bold text-sm">Back</button>
-                                    <button type="submit" disabled={pwdState.loading} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black text-sm hover:bg-rose-700 transition-all disabled:opacity-50">
-                                        Reset Password
+                                <div className="flex gap-3">
+                                    <button type="button" onClick={() => setPwdState({ ...pwdState, step: 'form' })} className="px-6 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-black text-[10px] uppercase tracking-widest">Back</button>
+                                    <button type="submit" disabled={pwdState.loading} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-rose-600/20 hover:bg-rose-700 active:scale-95 transition-all disabled:opacity-50">
+                                        Update Access
                                     </button>
                                 </div>
                             </form>
                         )}
 
                         {pwdState.step === 'success' && (
-                            <div className="text-center py-4 space-y-3">
-                                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl">✓</div>
-                                <p className="text-sm font-bold text-slate-600 dark:text-slate-400">Password reset successful!</p>
-                                <button onClick={() => setPwdState({ ...pwdState, step: 'form' })} className="text-xs font-black text-indigo-600 uppercase">Change again</button>
+                            <div className="text-center py-6 space-y-4 animate-in zoom-in duration-500">
+                                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-sm">✓</div>
+                                <div>
+                                    <p className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">Security Updated</p>
+                                    <button onClick={() => setPwdState({ ...pwdState, step: 'form' })} className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest hover:underline mt-2 bg-transparent uppercase tracking-widest">Update again</button>
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
-                
-                <div className="mt-12 pt-8 border-t border-slate-50 dark:border-slate-800">
-                    <div className="bg-indigo-600 rounded-3xl p-6 text-white flex items-center justify-between">
-                        <div>
-                            <h4 className="text-lg font-black">Need more help?</h4>
-                            <p className="text-xs text-white/50 font-medium">Contact the warden for major account changes.</p>
+            </div>
+
+            {/* Support Hero Card */}
+            <div className="bg-[#1A3263] rounded-[2.5rem] p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-110 transition-transform duration-700" />
+                <div className="relative z-10">
+                    <h4 className="text-2xl font-black mb-1">Need Account Support?</h4>
+                    <p className="text-indigo-200/60 font-medium">Contact the Hostel Administration for major changes or data issues.</p>
+                </div>
+                <button onClick={() => onRefresh()} className="relative z-10 px-8 py-4 bg-white text-[#1A3263] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#FAB95B] hover:scale-105 active:scale-95 transition-all shadow-xl">
+                    Refresh System Session
+                </button>
+            </div>
+
+            {isClearanceApproved && (
+                <div className="p-8 bg-rose-50/50 dark:bg-rose-900/10 rounded-[2.5rem] border-2 border-rose-100 dark:border-rose-900/30 space-y-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/40 rounded-xl flex items-center justify-center text-rose-600">
+                            <HiOutlineTrash size={22} />
                         </div>
-                        <button onClick={() => onRefresh()} className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black transition-all">Refresh Session</button>
+                        <h3 className="text-lg font-black text-rose-600 uppercase tracking-tighter">Deactivate Profile</h3>
+                    </div>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="max-w-xl">
+                            <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Permanently Remove Account</p>
+                            <p className="text-xs text-slate-500 font-medium leading-relaxed leading-relaxed">As your clearance is approved, you may now proceed to delete your account. This will purge your profile document from the system. Remaining hostel logs will be archived by the Warden.</p>
+                        </div>
+                        <button 
+                            onClick={() => setShowDeleteModal(true)}
+                            className="px-8 py-4 bg-rose-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-rose-700 active:scale-95 transition-all shadow-xl shadow-rose-600/20 whitespace-nowrap"
+                        >
+                            Delete Profile
+                        </button>
                     </div>
                 </div>
+            )}
 
-                {isClearanceApproved && (
-                    <div className="mt-8 p-8 bg-rose-50/30 dark:bg-rose-900/10 rounded-3xl border border-rose-100 dark:border-rose-900/30 space-y-4">
-                        <div className="flex items-center gap-3">
-                            <HiOutlineTrash className="text-rose-500 text-xl" />
-                            <h3 className="text-sm font-black text-rose-600 uppercase tracking-widest">Danger Zone</h3>
-                        </div>
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Delete Your Profile</p>
-                                <p className="text-xs text-slate-500 font-medium">Permanently remove your account and logout from the system.</p>
-                            </div>
-                            <button 
-                                onClick={() => setShowDeleteModal(true)}
-                                className="px-8 py-3 bg-rose-600 text-white rounded-2xl font-black text-xs hover:bg-rose-700 transition-all shadow-lg shadow-rose-500/20"
-                            >
-                                Delete Deactivation Requested Account
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
             {showDeleteModal && (
                 <DeleteProfileModal 
                     onClose={() => setShowDeleteModal(false)}

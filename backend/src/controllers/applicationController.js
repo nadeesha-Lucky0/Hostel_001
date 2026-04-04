@@ -250,7 +250,9 @@ async function getAllApplications(req, res) {
       else filter.applicationStatus = req.query.status;
     }
 
-    const applications = await Application.find(filter).sort({ createdAt: -1 });
+    const applications = await Application.find(filter)
+      .populate('student', 'phoneNumber profilePicture')
+      .sort({ createdAt: -1 });
     res.status(200).json(applications);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -357,7 +359,8 @@ async function exportApplications(req, res) {
 // retrieve a single application by ID
 async function getApplicationById(req, res) {
   try {
-    const app = await Application.findById(req.params.id);
+    const app = await Application.findById(req.params.id)
+      .populate('student', 'phoneNumber profilePicture');
     if (!app) return res.status(404).json({ error: "Application not found" });
     res.status(200).json(app);
   } catch (error) {

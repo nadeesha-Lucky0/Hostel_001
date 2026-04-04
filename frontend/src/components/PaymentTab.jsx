@@ -575,7 +575,7 @@ const PaymentTab = ({ user }) => {
                         </div>
                         Monthly Submission History
                     </h2>
-                    <div className="space-y-3">
+                    <div className="flex md:block space-y-3 md:space-y-3 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory pb-8 md:pb-0 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide">
                         {/* Header Row - Hidden on mobile */}
                         <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] border-b border-slate-100 dark:border-slate-800">
                             <div className="col-span-1">#</div>
@@ -586,34 +586,37 @@ const PaymentTab = ({ user }) => {
                         </div>
 
                         {paymentStatus.submittedMonths.map((m, idx) => (
-                            <div key={idx} className="group grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 md:p-6 bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 rounded-3xl hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-100 dark:hover:border-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300">
+                            <div key={idx} className="min-w-[85vw] flex-shrink-0 md:min-w-full snap-start group grid grid-cols-1 md:grid-cols-12 gap-5 items-center p-6 bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 rounded-3xl hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-100 dark:hover:border-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300">
                                 {/* Mobile Index & Label */}
-                                <div className="md:col-span-1 flex items-center justify-between md:justify-start">
-                                    <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-600 text-white text-[10px] font-black shadow-lg shadow-indigo-100 dark:shadow-none">
-                                        {idx + 1}
-                                    </span>
-                                    <span className="md:hidden text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Record #{idx + 1}</span>
+                                <div className="md:col-span-1 flex items-center justify-between md:justify-start gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-600 text-white text-[10px] font-black shadow-lg shadow-indigo-100 dark:shadow-none">
+                                            {idx + 1}
+                                        </span>
+                                        <span className="md:hidden text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">Entry Order</span>
+                                    </div>
+                                    <span className="md:hidden text-[10px] font-black text-indigo-400 dark:text-indigo-500 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-900/20 px-2 py-1 rounded-lg">Record #{idx + 1}</span>
                                 </div>
 
                                 {/* Period */}
-                                <div className="md:col-span-4 space-y-1">
-                                    <span className="md:hidden block text-[9px] font-black text-indigo-400 dark:text-indigo-500 uppercase tracking-widest">Payment Period</span>
-                                    <span className="text-sm md:text-base font-bold text-slate-700 dark:text-slate-200 truncate block">
+                                <div className="md:col-span-4 flex items-center justify-between md:block space-y-1 px-1">
+                                    <span className="md:hidden block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Payment Period</span>
+                                    <span className="text-sm md:text-base font-bold text-slate-700 dark:text-slate-200 truncate block text-right md:text-left">
                                         {m.months?.join(', ') || m.month} {m.year}
                                     </span>
                                 </div>
 
                                 {/* Amount */}
-                                <div className="md:col-span-2 md:text-center space-y-1">
+                                <div className="md:col-span-2 flex items-center justify-between md:block md:text-center space-y-1">
                                     <span className="md:hidden block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Amount Paid</span>
-                                    <span className="text-sm md:text-base font-black text-slate-800 dark:text-slate-100 block">
+                                    <span className="text-sm md:text-base font-black text-slate-800 dark:text-slate-100 block text-right md:text-center">
                                         LKR {m.amount?.toLocaleString()}
                                     </span>
                                 </div>
 
                                 {/* Status */}
-                                <div className="md:col-span-2 md:text-center flex items-center justify-between md:justify-center">
-                                    <span className="md:hidden text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status</span>
+                                <div className="md:col-span-2 md:text-center flex items-center justify-between md:justify-center pt-1 md:pt-0">
+                                    <span className="md:hidden text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Submission Status</span>
                                     <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
                                         m.status === 'Accepted' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' :
                                         m.status === 'Rejected' ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' :
@@ -624,24 +627,24 @@ const PaymentTab = ({ user }) => {
                                 </div>
 
                                 {/* Action */}
-                                <div className="md:col-span-3 flex justify-end gap-2 pt-2 md:pt-0">
+                                <div className="md:col-span-3 flex flex-wrap md:flex-nowrap justify-end gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
                                     {m.status === 'Rejected' && (
                                         <button
                                             onClick={() => handleEditClick({ ...m, submissionId: m._id })}
-                                            className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-md shadow-amber-100 dark:shadow-none"
+                                            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-md shadow-amber-100 dark:shadow-none min-w-[80px]"
                                         >
                                             <HiOutlinePencilSquare className="text-sm" />
-                                            <span>Edit</span>
+                                            <span>Update</span>
                                         </button>
                                     )}
                                     <a
                                         href={m.documentUrl}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-md group-hover:shadow-indigo-100 dark:group-hover:shadow-none"
+                                        className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-md group-hover:shadow-indigo-100 dark:group-hover:shadow-none min-w-[90px]"
                                     >
                                         <HiOutlineDocumentText className="text-sm" />
-                                        <span>Receipt</span>
+                                        <span>View Receipt</span>
                                     </a>
                                 </div>
                             </div>

@@ -362,13 +362,13 @@ const Landing = () => {
                             <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
                         </div>
                     ) : notices.length > 0 ? (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-8 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory pb-8 md:pb-0 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide">
                             {notices.map((notice) => {
                                 const atts = normalizeAttachments(notice);
                                 const images = atts.filter(a => a.type === 'image');
                                 const docs = atts.filter(a => a.type !== 'image');
                                 return (
-                                    <div key={notice._id} className="group bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:-translate-y-2 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer" onClick={() => navigate(`/notice/${notice._id}`)}>
+                                    <div key={notice._id} className="min-w-[85vw] md:min-w-0 snap-start group bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:-translate-y-2 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer" onClick={() => navigate(`/notice/${notice._id}`)}>
                                         {/* Multi-photo auto-slideshow */}
                                         {images.length > 0 && <LandingSlideshow images={images} />}
 

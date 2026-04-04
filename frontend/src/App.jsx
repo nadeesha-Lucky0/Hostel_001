@@ -12,7 +12,6 @@ import StudentDashboard from './pages/StudentDashboard'
 import StudentComplaintChat from './pages/StudentComplaintChat'
 import Notices from './pages/Notices'
 import NoticeDetail from './pages/NoticeDetail'
-import Profiles from './pages/Profiles'
 import Resources from './pages/Resources'
 import { useState } from 'react'
 
@@ -147,7 +146,7 @@ function App() {
                     <Route path="/complaints" element={<Complaints />} />
                     <Route path="/complaints/:id" element={<WardenComplaintChat />} />
                     <Route path="/notices" element={<Notices />} />
-                    <Route path="/profiles" element={<Profiles />} />
+
                     <Route path="/resources" element={<Resources />} />
                     <Route path="/warden/scan-records" element={<WardenScanRecords />} />
                     <Route path="/warden/settings" element={<StaffSettings />} />

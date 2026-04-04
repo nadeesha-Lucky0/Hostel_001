@@ -118,7 +118,9 @@ const updateStaffUserStatus = async (req, res) => {
         const { id } = req.params;
         const { status } = req.body;
 
-        if (!['pending', 'verified', 'suspended'].includes(status)) {
+        const normalizedStatus = (status || '').toLowerCase();
+
+        if (!['pending', 'verified', 'reject'].includes(normalizedStatus)) {
             return res.status(400).json({ success: false, message: 'Invalid status' });
         }
 
@@ -128,11 +130,11 @@ const updateStaffUserStatus = async (req, res) => {
         }
 
         // Prevent self-deactivation
-        if (id === req.user.id && (status === 'suspended' || status === 'pending')) {
+        if (id === req.user.id && (normalizedStatus === 'reject' || normalizedStatus === 'pending')) {
             return res.status(400).json({ success: false, message: 'You cannot change your own admin account status' });
         }
 
-        user.accountStatus = status;
+        user.accountStatus = normalizedStatus;
         await user.save();
 
         res.json({ success: true, message: 'Staff user status updated successfully', data: user });

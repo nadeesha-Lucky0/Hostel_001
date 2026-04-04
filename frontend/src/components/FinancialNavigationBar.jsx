@@ -56,9 +56,9 @@ export default function FinancialNavigationBar() {
             <div className="nav-container">
                 <div className="nav-logo-section">
                     <img src={logo} alt="SLIIT Logo" className="nav-logo-img" />
-                    <div className="hidden sm:block">
-                        <div className="nav-title">SLIIT Kandy <span className="text-amber-400">UNI</span></div>
-                        <div className="nav-subtitle text-white/40">Financial Management System</div>
+                    <div className="flex flex-col">
+                        <div className="nav-title text-sm sm:text-base font-black tracking-tight">SLIIT Kandy <span className="text-[#FAB95B] italic font-black">UNI</span></div>
+                        <div className="nav-subtitle text-[9px] sm:text-[10px] text-white/50 uppercase tracking-[0.2em] leading-none mt-1">Financial Management</div>
                     </div>
                 </div>
 
@@ -74,25 +74,25 @@ export default function FinancialNavigationBar() {
                                 }
                             >
                                 <span className="icon"><Icon /></span>
-                                <span className="label text-xs sm:text-[13px]">{item.label}</span>
+                                <span className="label text-xs sm:text-[13px] font-bold tracking-wide">{item.label}</span>
                             </NavLink>
                         );
                     })}
                 </nav>
 
-                <div className="nav-actions">
-                    <button onClick={toggleTheme} className="theme-toggle" title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}>
-                        {theme === 'light' ? <HiOutlineMoon /> : <HiOutlineSun />}
+                <div className="nav-actions flex items-center gap-1 sm:gap-3">
+                    <button onClick={toggleTheme} className="theme-toggle hover:scale-110 transition-all duration-300" title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}>
+                        {theme === 'light' ? <HiOutlineMoon className="text-lg" /> : <HiOutlineSun className="text-lg" />}
                     </button>
                     <button 
                         onClick={() => setIsMenuOpen(true)}
-                        className="theme-toggle lg:hidden"
+                        className="theme-toggle lg:hidden ml-2 hover:scale-110 transition-all duration-300"
                         title="Open Menu"
                     >
-                        <HiOutlineBars3 />
+                        <HiOutlineBars3 className="text-xl" />
                     </button>
-                    <button onClick={logout} className="p-2 text-white/60 hover:text-rose-400 transition-colors hidden sm:block" title="Logout">
-                        <HiOutlineArrowRightOnRectangle className="text-xl" />
+                    <button onClick={logout} className="p-2 text-white/60 hover:text-rose-400 transition-all hidden sm:block ml-2 group" title="Logout">
+                        <HiOutlineArrowRightOnRectangle className="text-xl group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>
             </div>

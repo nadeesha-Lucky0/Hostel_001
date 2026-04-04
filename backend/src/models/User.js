@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
     },
     accountStatus: {
         type: String,
-        enum: ['pending', 'verified', 'suspended'],
+        enum: ['pending', 'verified', 'reject'],
         default: 'pending'
     },
     phoneNumber: {

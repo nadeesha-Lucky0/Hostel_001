@@ -10,7 +10,6 @@ const navItems = [
     { to: '/student-applications', icon: HiOutlineUserGroup, label: 'Allocations' },
     { to: '/records', icon: HiOutlineDocumentChartBar, label: 'Records' },
     { to: '/warden/scan-records', icon: HiOutlineArrowsRightLeft, label: 'In/Out Logs' },
-    { to: '/profiles', icon: HiOutlineUser, label: 'Profiles' },
     { to: '/resources', icon: HiOutlineCube, label: 'Resources' },
     { to: '/complaints', icon: HiOutlineChatBubbleLeftRight, label: 'Complaints' },
     { to: '/notices', icon: HiOutlineMegaphone, label: 'Notices' }
@@ -90,7 +89,6 @@ export default function NavigationBar() {
         { to: '/student-applications', icon: HiOutlineUserGroup, label: 'Allocations' },
         { to: '/records', icon: HiOutlineDocumentChartBar, label: 'Records' },
         { to: '/warden/scan-records', icon: HiOutlineArrowsRightLeft, label: 'In/Out Logs' },
-        { to: '/profiles', icon: HiOutlineUser, label: 'Profiles' },
         { to: '/resources', icon: HiOutlineCube, label: 'Resources' },
         { to: '/complaints', icon: HiOutlineChatBubbleLeftRight, label: 'Complaints', badge: unreadCount },
         { to: '/notices', icon: HiOutlineMegaphone, label: 'Notices' },
@@ -102,9 +100,9 @@ export default function NavigationBar() {
             <div className="nav-container">
                 <div className="nav-logo-section">
                     <img src={logo} alt="SLIIT Logo" className="nav-logo-img" />
-                    <div className="hidden sm:block">
-                        <div className="nav-title">SLIIT Kandy <span className="text-[#FAB95B]">UNI</span></div>
-                        <div className="nav-subtitle text-white/40">Hostel Management System</div>
+                    <div className="flex flex-col">
+                        <div className="nav-title text-[15px] sm:text-[18px]">SLIIT Kandy <span className="text-[#FAB95B]">UNI</span></div>
+                        <div className="nav-subtitle text-[10px] sm:text-xs text-white/40 leading-tight">Hostel Management</div>
                     </div>
                 </div>
 
@@ -131,22 +129,18 @@ export default function NavigationBar() {
                     ))}
                 </nav>
 
-                <div className="nav-actions">
+                <div className="nav-actions flex items-center gap-2 sm:gap-4">
                     <button onClick={toggleTheme} className="theme-toggle" title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}>
-                        {theme === 'light' ? <HiOutlineMoon /> : <HiOutlineSun />}
+                        {theme === 'light' ? <HiOutlineMoon className="text-lg" /> : <HiOutlineSun className="text-lg" />}
                     </button>
                     <button 
                         onClick={() => setIsMenuOpen(true)}
-                        className="theme-toggle lg:hidden"
+                        className="theme-toggle lg:hidden ml-1"
                         title="Open Menu"
                     >
-                        <HiOutlineBars3 />
+                        <HiOutlineBars3 className="text-xl font-bold" />
                     </button>
-                    <button 
-                        onClick={logout} 
-                        className="p-2 text-white/60 hover:text-rose-400 transition-colors hidden sm:block" 
-                        title="Logout"
-                    >
+                    <button onClick={logout} className="p-2 text-white/60 hover:text-rose-400 transition-colors hidden sm:block ml-2" title="Logout">
                         <HiOutlineArrowRightOnRectangle className="text-xl" />
                     </button>
                 </div>
