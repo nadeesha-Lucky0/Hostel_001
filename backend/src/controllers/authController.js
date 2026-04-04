@@ -394,14 +394,24 @@ const debugEmailKey = async (req, res) => {
             }
         });
 
-        const data = await response.json();
+        const responseAlt = await fetch('https://api-me.brevo.com/v3/account', {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json',
+                'api-key': apiKey,
+                'x-sib-api-key': apiKey
+            }
+        });
+        const dataAlt = await responseAlt.json();
         
         res.json({
-            success: response.ok,
-            status: response.status,
+            success: response.ok || responseAlt.ok,
+            globalStatus: response.status,
+            meStatus: responseAlt.status,
             maskedKey: `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`,
             keyLength: apiKey.length,
-            brevoResponse: data
+            globalResponse: data,
+            meResponse: dataAlt
         });
     } catch (err) {
         console.error('[Debug] Error verifying API key:', err);
