@@ -14,25 +14,32 @@ const testEmail = async () => {
     
     // Check if variables are loaded
     console.log("Checking Environment Variables...");
-    console.log("EMAIL_FROM:", process.env.EMAIL_FROM || "MISSING");
-    console.log("SMTP_PASS (API Key):", process.env.SMTP_PASS ? "PRESENT (hidden)" : "MISSING");
+    const emailFrom = process.env.EMAIL_FROM || "MISSING";
+    const smtpPass = (process.env.SMTP_PASS || "").trim();
+    
+    console.log("EMAIL_FROM:", emailFrom);
+    if (smtpPass) {
+        const masked = `${smtpPass.substring(0, 4)}...${smtpPass.substring(smtpPass.length - 4)}`;
+        console.log(`SMTP_PASS (API Key): ${masked} (Length: ${smtpPass.length})`);
+    } else {
+        console.log("SMTP_PASS (API Key): MISSING");
+    }
     console.log("------------------------------------------");
 
-    if (!process.env.SMTP_PASS || !process.env.EMAIL_FROM) {
+    if (!smtpPass || emailFrom === "MISSING") {
         console.error("ERROR: Missing required environment variables. Registration cannot proceed.");
         return;
     }
 
     try {
-        console.log("Sending test email to:", process.env.EMAIL_FROM);
+        console.log("Sending test email to:", emailFrom);
         const result = await sendEmail({
-            email: process.env.EMAIL_FROM,
-            subject: "SLIIT Hostel - Final API Test",
+            email: emailFrom,
+            subject: "SLIIT Hostel - API Key Verification Test",
             message: `
                 <div style="font-family: sans-serif; padding: 20px; border: 1px solid #4f46e5; border-radius: 10px;">
-                    <h1 style="color: #4f46e5;">API Connection Successful!</h1>
-                    <p>If you are reading this, your Brevo API configuration on Render is working perfectly.</p>
-                    <p>The SMTP port issue has been resolved by switching to HTTPS.</p>
+                    <h1 style="color: #4f46e5;">API Key Verified!</h1>
+                    <p>If you are reading this, your Brevo API Key is correctly configured on Render.</p>
                     <hr />
                     <p style="font-size: 12px; color: #666;">Sent at: ${new Date().toLocaleString()} via Brevo API</p>
                 </div>
@@ -44,7 +51,7 @@ const testEmail = async () => {
         } else {
             console.error("\n❌ FAILED: Could not send email.");
             console.error("Error Message:", result.error);
-            console.log("\nSUGGESTION: Check your SMTP_PASS (API key) and ensure EMAIL_FROM is a verified sender in Brevo.");
+            console.log("\nSUGGESTION: Check your Render logs for the 'Using Key' message and verify the length (usually 84 characters).");
         }
     } catch (err) {
         console.error("\n💥 CRITICAL ERROR during test:", err.message);

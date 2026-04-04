@@ -14,14 +14,20 @@ const sendEmail = async ({ email, subject, message }) => {
         return { success: false, error: 'Internal configuration error: Missing API Key' };
     }
 
+    const apiKey = process.env.SMTP_PASS.trim();
+    
+    // Log masked key for verification in Render logs
+    const maskedKey = `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`;
+    console.log(`[EmailHelper] Using Key: ${maskedKey} (Length: ${apiKey.length})`);
+
     try {
         console.log('[EmailHelper] Initiating Brevo API request...');
         const response = await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
             headers: {
-                'accept': 'application/json',
-                'api-key': process.env.SMTP_PASS, // Your Brevo API key
-                'content-type': 'application/json'
+                'Accept': 'application/json',
+                'api-key': apiKey, // Your Brevo API key
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 sender: { 
