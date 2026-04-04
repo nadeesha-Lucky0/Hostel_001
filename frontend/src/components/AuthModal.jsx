@@ -261,15 +261,81 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
     const [isLogin, setIsLogin] = useState(initialMode === 'login');
     const [showForgot, setShowForgot] = useState(false);
 
+    // Signup OTP state
+    const [otpSent, setOtpSent] = useState(false);
+    const [otp, setOtp] = useState('');
+    const [emailVerified, setEmailVerified] = useState(false);
+    const [otpLoading, setOtpLoading] = useState(false);
+    const [resendingOtp, setResendingOtp] = useState(false);
+
     React.useEffect(() => {
         if (isOpen) {
             setIsLogin(initialMode === 'login');
             setError('');
             setShowForgot(false);
+            setOtpSent(false);
+            setOtp('');
+            setEmailVerified(false);
         }
     }, [isOpen, initialMode]);
 
     if (!isOpen) return null;
+
+    const handleSendSignupOtp = async () => {
+        setError('');
+        const studentEmailRegex = /^[a-zA-Z]{2}\d{8}@my\.sliit\.lk$/i;
+        if (!studentEmailRegex.test(formData.email)) {
+            setError('Please enter your official SLIIT student email (e.g., ITXXXXXXXX@my.sliit.lk)');
+            return;
+        }
+
+        setOtpLoading(true);
+        try {
+            const res = await fetch('/api/auth/send-signup-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: formData.email }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setOtpSent(true);
+                setOtp('');
+            } else {
+                setError(data.message || 'Failed to send verification code');
+            }
+        } catch (err) {
+            setError('Connection error. Please try again.');
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+    const handleVerifySignupOtp = async () => {
+        setError('');
+        if (otp.length !== 6) {
+            setError('Please enter the 6-digit verification code');
+            return;
+        }
+
+        setOtpLoading(true);
+        try {
+            const res = await fetch('/api/auth/verify-signup-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: formData.email, otp }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setEmailVerified(true);
+            } else {
+                setError(data.message || 'Invalid verification code');
+            }
+        } catch (err) {
+            setError('Connection error. Please try again.');
+        } finally {
+            setOtpLoading(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -277,6 +343,11 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
         setLoading(true);
 
         if (!isLogin) {
+            if (!emailVerified) {
+                setError('Please verify your email before creating an account');
+                setLoading(false);
+                return;
+            }
             const studentEmailRegex = /^[a-zA-Z]{2}\d{8}@my\.sliit\.lk$/i;
             if (!studentEmailRegex.test(formData.email)) {
                 setError('Please enter your official SLIIT student email (e.g., ITXXXXXXXX@my.sliit.lk or BMXXXXXXXX@my.sliit.lk)');
@@ -392,16 +463,56 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Email Address</label>
-                                    <div className="relative">
+                                    <div className="relative group">
                                         <HiOutlineEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                         <input type="email" required
-                                            className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                            className={`w-full pl-11 pr-[100px] py-3 bg-slate-50 dark:bg-slate-800/50 border ${emailVerified ? 'border-emerald-500/50' : 'border-slate-100'} dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500`}
                                             placeholder="name@my.sliit.lk"
                                             value={formData.email}
+                                            disabled={emailVerified && !isLogin}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         />
+                                        {!isLogin && !emailVerified && (
+                                            <button 
+                                                type="button"
+                                                onClick={handleSendSignupOtp}
+                                                disabled={otpLoading || !formData.email}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-indigo-600 text-white text-[10px] font-bold rounded-lg hover:bg-indigo-700 transition-all disabled:opacity-50"
+                                            >
+                                                {otpLoading ? '...' : (otpSent ? 'Resend' : 'Verify')}
+                                            </button>
+                                        )}
+                                        {!isLogin && emailVerified && (
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-emerald-500 text-[10px] font-bold">
+                                                <HiOutlineCheckCircle className="text-sm" /> Verified
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
+
+                                {/* Signup OTP Input */}
+                                {!isLogin && otpSent && !emailVerified && (
+                                    <div className="space-y-1 animate-in slide-in-from-top-2 duration-300">
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 ml-1">Verification Code</label>
+                                        <div className="relative">
+                                            <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" />
+                                            <input type="text" maxLength={6}
+                                                className="w-full pl-11 pr-[100px] py-3 bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-500/30 rounded-xl text-sm font-bold tracking-[0.2em] text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                                placeholder="000000"
+                                                value={otp}
+                                                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                            />
+                                            <button 
+                                                type="button"
+                                                onClick={handleVerifySignupOtp}
+                                                disabled={otpLoading || otp.length !== 6}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-emerald-600 text-white text-[10px] font-bold rounded-lg hover:bg-emerald-700 transition-all disabled:opacity-50"
+                                            >
+                                                {otpLoading ? 'Verifying...' : 'Submit'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Password</label>
@@ -451,9 +562,9 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
                                 {error && <p className="text-xs text-rose-500 font-bold text-center bg-rose-50 py-2 rounded-lg">{error}</p>}
 
-                                <button type="submit" disabled={loading}
+                                <button type="submit" disabled={loading || (!isLogin && !emailVerified)}
                                     className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 active:scale-[0.98] transition-all disabled:opacity-50">
-                                    {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
+                                    {loading ? 'Processing...' : (isLogin ? 'Sign In' : (emailVerified ? 'Create Account' : 'Verify Email First'))}
                                 </button>
                             </form>
 

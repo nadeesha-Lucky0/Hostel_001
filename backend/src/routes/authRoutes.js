@@ -1,11 +1,16 @@
 const express = require('express');
-const { register, login, getMe, forgotPassword, resetPassword, requestPhoneUpdateOTP, verifyPhoneUpdateOTP } = require('../controllers/authController.js');
+const { 
+    register, login, getMe, forgotPassword, resetPassword, 
+    requestPhoneUpdateOTP, verifyPhoneUpdateOTP, sendSignupOTP, verifySignupOTP 
+} = require('../controllers/authController.js');
 const { protect } = require('../middleware/authMiddleware.js');
 
 const router = express.Router();
 
 router.post('/register', register);
 router.post('/login', login);
+router.post('/send-signup-otp', sendSignupOTP);
+router.post('/verify-signup-otp', verifySignupOTP);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.post('/request-phone-update', protect, requestPhoneUpdateOTP);
