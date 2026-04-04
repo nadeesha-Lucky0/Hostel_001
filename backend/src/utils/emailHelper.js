@@ -1,49 +1,57 @@
-const nodemailer = require('nodemailer');
+// backend/src/utils/emailHelper.js
 
+/**
+ * Sends an email using Brevo's HTTP API (v3) instead of SMTP.
+ * This bypasses SMTP port blocking issues on cloud platforms like Render.
+ */
 const sendEmail = async ({ email, subject, message }) => {
-    console.log(`[EmailHelper] Attempting to send email to: ${email}`);
+    console.log(`[EmailHelper] Attempting to send email via API to: ${email}`);
     
     // Check for required environment variables
-    const requiredEnv = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS'];
-    const missing = requiredEnv.filter(key => !process.env[key]);
-    if (missing.length > 0) {
-        console.error(`[EmailHelper] Missing environment variables: ${missing.join(', ')}`);
-        return { success: false, error: `Missing environment variables: ${missing.join(', ')}` };
+    // Note: We use process.env.SMTP_PASS as the API key
+    if (!process.env.SMTP_PASS || !process.env.EMAIL_FROM) {
+        console.error('[EmailHelper] Missing SMTP_PASS (API Key) or EMAIL_FROM in environment.');
+        return { success: false, error: 'Internal configuration error: Missing API Key' };
     }
 
-    const port = Number(process.env.SMTP_PORT);
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: port,
-        secure: port === 465, // Automatically use SSL if port is 465
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-        },
-        tls: {
-            // Do not fail on invalid certificates (helpful for some cloud environments)
-            rejectUnauthorized: false
-        },
-        connectionTimeout: 30000, // Increased to 30 seconds
-        greetingTimeout: 30000,
-        socketTimeout: 30000,
-    });
-
-    const mailOptions = {
-        from: `${process.env.FROM_NAME || 'SLIIT Hostel'}<${process.env.EMAIL_FROM}>`,
-        to: email,
-        subject: subject,
-        html: message,
-    };
-
     try {
-        console.log('[EmailHelper] Initiating transporter.sendMail...');
-        const info = await transporter.sendMail(mailOptions);
-        console.log('[EmailHelper] Email sent successfully: ' + info.response);
-        return { success: true };
+        console.log('[EmailHelper] Initiating Brevo API request...');
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.SMTP_PASS, // Your Brevo API key
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { 
+                    name: process.env.FROM_NAME || 'SLIIT Hostel', 
+                    email: process.env.EMAIL_FROM 
+                },
+                to: [{ email: email }],
+                subject: subject,
+                htmlContent: message
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log('[EmailHelper] Email sent successfully via API:', data.messageId);
+            return { success: true };
+        } else {
+            console.error('[EmailHelper] Brevo API Error:', data);
+            return { 
+                success: false, 
+                error: `API Error: ${data.message || 'Unknown Brevo API error'}` 
+            };
+        }
     } catch (error) {
-        console.error('[EmailHelper] NODEMAILER ERROR:', error);
-        return { success: false, error: error.message };
+        console.error('[EmailHelper] API FETCH ERROR:', error);
+        return { 
+            success: false, 
+            error: `Network error: ${error.message}` 
+        };
     }
 };
 
