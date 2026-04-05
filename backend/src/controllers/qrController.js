@@ -29,7 +29,9 @@ const getStudentQrStatus = async (req, res) => {
       return res.status(400).json({ success: false, message: "studentId is required" });
     }
 
-    const student = await User.findOne({ studentId }).select("_id studentId role");
+    const student = await User.findOne({ 
+      studentId: { $regex: new RegExp(`^${studentId}$`, 'i') } 
+    }).select("_id studentId role");
     if (!student || student.role !== "student") {
       return res.status(404).json({ success: false, message: "Student not found" });
     }
@@ -92,7 +94,9 @@ const logScan = async (req, res) => {
     }
 
     // ensure student exists
-    const student = await User.findOne({ studentId: normalizedStudentId }).select("_id studentId role");
+    const student = await User.findOne({ 
+      studentId: { $regex: new RegExp(`^${normalizedStudentId}$`, 'i') } 
+    }).select("_id studentId role");
     if (!student || student.role !== "student") {
       return res.status(404).json({ success: false, message: "Student not found" });
     }

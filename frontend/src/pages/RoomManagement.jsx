@@ -21,6 +21,7 @@ export default function RoomManagement() {
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, data: null })
     const [isAddFloorModalOpen, setIsAddFloorModalOpen] = useState(false)
     const [selectedFloors, setSelectedFloors] = useState([])
+    const [isAddingFloor, setIsAddingFloor] = useState(false)
 
     const loadFloors = useCallback(async () => {
         try {
@@ -40,14 +41,19 @@ export default function RoomManagement() {
     useEffect(() => { loadFloors() }, [loadFloors])
 
     const handleAddFloors = async () => {
+        if (selectedFloors.length === 0 || isAddingFloor) return
         try {
-            if (selectedFloors.length === 0) return
+            setIsAddingFloor(true)
             await api.addFloorsBulk({ wing, floorNumbers: selectedFloors })
             toast.success(`${selectedFloors.length} floors added`)
             setIsAddFloorModalOpen(false)
             setSelectedFloors([])
             loadFloors()
-        } catch (err) { toast.error(err.message) }
+        } catch (err) {
+            toast.error(err.message)
+        } finally {
+            setIsAddingFloor(false)
+        }
     }
 
     const handleToggleFloor = async (floor) => {
@@ -331,10 +337,10 @@ export default function RoomManagement() {
                                     </button>
                                     <button
                                         className="btn btn-primary btn-sm"
-                                        disabled={selectedFloors.length === 0}
+                                        disabled={selectedFloors.length === 0 || isAddingFloor}
                                         onClick={handleAddFloors}
                                     >
-                                        Confirm & Add
+                                        {isAddingFloor ? 'Adding...' : 'Confirm & Add'}
                                     </button>
                                 </div>
                             </div>

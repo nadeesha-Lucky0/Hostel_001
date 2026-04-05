@@ -119,7 +119,7 @@ const PublicStudentInOut = () => {
                                     type="text"
                                     value={studentIdInput}
                                     onChange={(e) => setStudentIdInput(e.target.value.toUpperCase())}
-                                    placeholder="e.g. IT24102141"
+                                    placeholder="e.g. IT24XXXXXX"
                                     className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-indigo-500"
                                 />
                             </div>

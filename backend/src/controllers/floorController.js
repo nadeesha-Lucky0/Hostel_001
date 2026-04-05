@@ -1,5 +1,6 @@
 const Floor = require('../models/Floor');
 const Room = require('../models/Room');
+const Resource = require('../models/Resource');
 
 // GET all floors (filter by wing)
 exports.getFloors = async (req, res) => {
@@ -52,7 +53,10 @@ exports.createFloor = async (req, res) => {
                 roomnumber: i,
                 type: 'double',
                 isactive: true,
-                beds: [{ bedId: 'A', isOccupied: false }, { bedId: 'B', isOccupied: false }]
+                beds: [
+                    { bedId: 'A', isOccupied: false },
+                    { bedId: 'B', isOccupied: false }
+                ]
             });
         }
         // Rooms 16-19 (Single)
@@ -66,12 +70,42 @@ exports.createFloor = async (req, res) => {
                 roomnumber: i,
                 type: 'single',
                 isactive: true,
-                beds: [{ bedId: 'A', isOccupied: false }]
+                beds: [
+                    { bedId: 'A', isOccupied: false }
+                ]
             });
         }
 
-        await Room.create(roomsToCreate);
-        res.status(201).json({ floor, rooms: roomsToCreate });
+        const createdRooms = await Room.create(roomsToCreate);
+        
+        // Auto-create Resource records for each room (Clustered Array format)
+        for (const room of createdRooms) {
+            // DESTRUCTIVE CLEANUP: Purge ALL furniture for this room
+            await Resource.deleteMany({ roomId: room._id });
+
+            const furnitureItems = [];
+            for (const bed of room.beds) {
+                for (const type of ['CHAIR', 'CUPBOARD', 'TABLE']) {
+                    furnitureItems.push({
+                        bedId: bed.bedId,
+                        itemType: type,
+                        uniqueCode: null,
+                        status: 'AVAILABLE'
+                    });
+                }
+            }
+
+            await Resource.create({
+                roomId: room._id,
+                roomRef: room.Roomid,
+                floorNumber: room.floorNumber,
+                category: 'ROOM_GOOD',
+                items: furnitureItems,
+                name: `Furniture — Room ${room.Roomid}`
+            });
+        }
+
+        res.status(201).json({ floor, rooms: createdRooms });
     } catch (err) {
         if (err.code === 11000) {
             return res.status(400).json({ error: 'Floor already exists for this wing' });
@@ -140,15 +174,26 @@ exports.deleteFloor = async (req, res) => {
             });
         }
 
-        // Delete all rooms associated with this floor (by ObjectId and floorID string)
-        await Room.deleteMany({
+        // 1. Find all room IDs for this floor before deleting them
+        const floorRooms = await Room.find({
             $or: [
                 { floor: floor._id },
                 { floorid: floor.floorID }
             ]
-        });
+        }, '_id');
+        const roomIds = floorRooms.map(r => r._id);
+
+        // 2. Cleanup Resources collection (Delete all furniture for those rooms)
+        const Resource = require('../models/Resource');
+        await Resource.deleteMany({ roomId: { $in: roomIds } });
+
+        // 3. Delete all rooms associated with this floor 
+        await Room.deleteMany({ _id: { $in: roomIds } });
+
+        // 4. Delete the floor itself
         await Floor.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Floor and rooms deleted' });
+
+        res.json({ message: 'Floor, Rooms, and associated Furniture deleted successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -163,6 +208,13 @@ exports.createFloorsBulk = async (req, res) => {
         for (const num of floorNumbers) {
             const wingInitial = wing.charAt(0).toUpperCase();
             const floorID = `FLR-${wingInitial}${String(num).padStart(2, '0')}`;
+
+            // CHECK: If floor already exists, skip it instead of failing
+            const existingFloor = await Floor.findOne({ floorID, wing });
+            if (existingFloor) {
+                console.log(`Floor ${floorID} already exists for wing ${wing}, skipping...`);
+                continue; 
+            }
 
             const floor = await Floor.create({
                 floorID,
@@ -191,7 +243,10 @@ exports.createFloorsBulk = async (req, res) => {
                     roomnumber: i,
                     type: 'double',
                     isactive: true,
-                    beds: [{ bedId: 'A', isOccupied: false }, { bedId: 'B', isOccupied: false }]
+                    beds: [
+                        { bedId: 'A', isOccupied: false },
+                        { bedId: 'B', isOccupied: false }
+                    ]
                 });
             }
             for (let i = 16; i <= 19; i++) {
@@ -204,10 +259,40 @@ exports.createFloorsBulk = async (req, res) => {
                     roomnumber: i,
                     type: 'single',
                     isactive: true,
-                    beds: [{ bedId: 'A', isOccupied: false }]
+                    beds: [
+                        { bedId: 'A', isOccupied: false }
+                    ]
                 });
             }
-            await Room.create(roomsToCreate);
+            const createdRooms = await Room.create(roomsToCreate);
+            
+            // Auto-create Resource records for each room (Clustered Array format)
+            for (const room of createdRooms) {
+                // DESTRUCTIVE CLEANUP: Purge ALL furniture for this room
+                await Resource.deleteMany({ roomId: room._id });
+
+                const furnitureItems = [];
+                for (const bed of room.beds) {
+                    for (const type of ['CHAIR', 'CUPBOARD', 'TABLE']) {
+                        furnitureItems.push({
+                            bedId: bed.bedId,
+                            itemType: type,
+                            uniqueCode: null,
+                            status: 'AVAILABLE'
+                        });
+                    }
+                }
+
+                await Resource.create({
+                    roomId: room._id,
+                    roomRef: room.Roomid,
+                    floorNumber: room.floorNumber,
+                    category: 'ROOM_GOOD',
+                    items: furnitureItems,
+                    name: `Furniture — Room ${room.Roomid}`
+                });
+            }
+            
             CreatedFloors.push(floor);
         }
 

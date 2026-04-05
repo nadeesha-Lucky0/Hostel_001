@@ -1,6 +1,6 @@
 const Resource = require("../models/Resource.js");
-const ResourceAllocation = require("../models/ResourceAllocation.js");
 const User = require("../models/User.js");
+const CommonAreaItem = require("../models/CommonAreaItem.js");
 
 const MAX_ACTIVE_ALLOCATIONS_PER_STUDENT = 2;
 
@@ -72,19 +72,6 @@ exports.updateResource = async (req, res) => {
 
     const { name, category, status } = req.body;
 
-    if (status === "AVAILABLE" && resource.status === "ALLOCATED") {
-      const activeAlloc = await ResourceAllocation.findOne({
-        resource: resource._id,
-        status: "ACTIVE",
-      });
-
-      if (activeAlloc) {
-        return res.status(400).json({ message: "Cannot set to AVAILABLE while it has an ACTIVE allocation" });
-      }
-    }
-
-    resource.name = name || resource.name;
-    resource.category = category || resource.category;
     if (status) resource.status = status;
 
     const updated = await resource.save();
@@ -115,81 +102,71 @@ exports.deleteResource = async (req, res) => {
   }
 };
 
-// Allocate resource
-// POST /api/resources/allocate
-exports.allocateResource = async (req, res) => {
+// Return resource functionality removed as per unused collection request
+
+// ── Common Area Items ──────────────────────────────────────────────────────────
+
+// GET /api/resources/common-area?areaName=Ground Floor
+exports.getCommonAreaItems = async (req, res) => {
   try {
-    const { resourceId, studentId } = req.body;
-
-    if (!resourceId || !studentId) {
-      return res.status(400).json({ message: "resourceId and studentId are required" });
-    }
-
-    const activeCount = await ResourceAllocation.countDocuments({
-      student: studentId,
-      status: "ACTIVE",
-    });
-
-    if (activeCount >= MAX_ACTIVE_ALLOCATIONS_PER_STUDENT) {
-      return res.status(400).json({ message: `Student reached limit: ${MAX_ACTIVE_ALLOCATIONS_PER_STUDENT} active items` });
-    }
-
-    const resource = await Resource.findById(resourceId);
-    if (!resource || resource.status !== "AVAILABLE") {
-      return res.status(400).json({ message: "Resource not available for allocation" });
-    }
-
-    resource.status = "ALLOCATED";
-    await resource.save();
-
-    const allocation = await ResourceAllocation.create({
-      resource: resourceId,
-      student: studentId,
-      status: "ACTIVE",
-    });
-
-    res.status(201).json(allocation);
+    const filter = {};
+    if (req.query.areaName) filter.areaName = req.query.areaName;
+    const items = await CommonAreaItem.find(filter).sort({ createdAt: -1 });
+    res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// Get allocations
-// GET /api/resources/allocations
-exports.getAllocations = async (req, res) => {
+// POST /api/resources/common-area
+exports.addCommonAreaItem = async (req, res) => {
   try {
-    const allocations = await ResourceAllocation.find()
-      .populate("resource")
-      .populate("student", "name email studentId")
-      .sort({ createdAt: -1 });
-
-    res.json(allocations);
+    const { areaName, itemType, itemName, uniqueCode, status } = req.body;
+    if (!areaName || !itemType || !itemName || !uniqueCode) {
+      return res.status(400).json({ message: 'areaName, itemType, itemName, and uniqueCode are required' });
+    }
+    const existing = await CommonAreaItem.findOne({ uniqueCode: uniqueCode.trim() });
+    if (existing) {
+      return res.status(409).json({ message: 'An item with this unique code already exists' });
+    }
+    const item = await CommonAreaItem.create({
+      areaName,
+      itemType: itemType.trim(),
+      itemName: itemName.trim(),
+      uniqueCode: uniqueCode.trim(),
+      status: status || 'AVAILABLE'
+    });
+    res.status(201).json(item);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// Return resource
-// POST /api/resources/return/:id
-exports.returnResource = async (req, res) => {
+// PATCH /api/resources/common-area/:id/status
+exports.updateCommonAreaItemStatus = async (req, res) => {
   try {
-    const allocation = await ResourceAllocation.findById(req.params.id);
-
-    if (!allocation || allocation.status === "RETURNED") {
-      return res.status(400).json({ message: "Allocation not found or already returned" });
+    const { status } = req.body;
+    if (!['AVAILABLE', 'MISSING', 'MAINTENANCE'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
     }
+    const item = await CommonAreaItem.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+    if (!item) return res.status(404).json({ message: 'Item not found' });
+    res.json(item);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
-    const resource = await Resource.findById(allocation.resource);
-    if (resource) {
-      resource.status = "AVAILABLE";
-      await resource.save();
-    }
-
-    allocation.status = "RETURNED";
-    allocation.returnedAt = new Date();
-    await allocation.save();
-
-    res.json({ message: "Resource returned successfully" });
+// DELETE /api/resources/common-area/:id
+exports.deleteCommonAreaItem = async (req, res) => {
+  try {
+    const item = await CommonAreaItem.findByIdAndDelete(req.params.id);
+    if (!item) return res.status(404).json({ message: 'Item not found' });
+    res.json({ message: 'Item deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

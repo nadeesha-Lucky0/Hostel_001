@@ -545,34 +545,110 @@ export const api = {
         return res.json();
     },
 
-    allocateResource: async (data) => {
-        const res = await fetch(`${API_BASE}/resources/allocate`, {
+    // Resource allocation logic removed as per unused collection request
+
+    // ── Common Area Items ───────────────────────────────────────────
+    getCommonAreaItems: async (areaName) => {
+        const p = new URLSearchParams();
+        if (areaName) p.append('areaName', areaName);
+        const res = await fetch(`${API_BASE}/resources/common-area?${p}`);
+        if (!res.ok) throw new Error('Failed to fetch common area items');
+        return res.json();
+    },
+
+    addCommonAreaItem: async (data) => {
+        const res = await fetch(`${API_BASE}/resources/common-area`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
         if (!res.ok) {
             const err = await res.json();
-            throw new Error(err.message || 'Failed to allocate resource');
+            throw new Error(err.message || 'Failed to add item');
         }
         return res.json();
     },
 
-    getResourceAllocations: async () => {
-        const res = await fetch(`${API_BASE}/resources/allocations`);
-        if (!res.ok) throw new Error('Failed to fetch resource allocations');
-        return res.json();
-    },
-
-    returnResource: async (id) => {
-        const res = await fetch(`${API_BASE}/resources/return/${id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+    updateCommonAreaItemStatus: async (id, status) => {
+        const res = await fetch(`${API_BASE}/resources/common-area/${id}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
         });
         if (!res.ok) {
             const err = await res.json();
-            throw new Error(err.message || 'Failed to return resource');
+            throw new Error(err.message || 'Failed to update status');
         }
         return res.json();
+    },
+
+    deleteCommonAreaItem: async (id) => {
+        const res = await fetch(`${API_BASE}/resources/common-area/${id}`, { method: 'DELETE' });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.message || 'Failed to delete item');
+        }
+        return res.json();
+    },
+
+    // ── Room Goods ──────────────────────────────────────────────────
+    getRoomGoods: async (roomId) => {
+        const res = await fetch(`${API_BASE}/rooms/${roomId}/goods`);
+        if (!res.ok) throw new Error('Failed to fetch room goods');
+        return res.json();
+    },
+
+    updateBedGood: async (roomId, goodId, data) => {
+        // data: { bedId, uniqueCode?, status? }
+        const res = await fetch(`${API_BASE}/rooms/${roomId}/goods/${goodId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Failed to update bed good');
+        }
+        return res.json();
+    },
+
+    updateRoomLevelGood: async (roomId, goodId, data) => {
+        // data: { uniqueCode?, status? }
+        const res = await fetch(`${API_BASE}/rooms/${roomId}/room-goods/${goodId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Failed to update room good');
+        }
+        return res.json();
+    },
+
+    migrateRoomGoods: async (payload = {}) => {
+        const res = await fetch(`${API_BASE}/rooms/migrate-goods`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Migration failed');
+        return res.json();
+    },
+
+    searchFurniture: async (code) => {
+        const token = sessionStorage.getItem('hostel_token');
+        const res = await fetch(`${API_BASE}/rooms/search-furniture/${code}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+            if (res.status === 404) throw new Error('Furniture code not found');
+            throw new Error('Search failed');
+        }
+        return res.json();
+    },
+
+    getResourcesExportUrl: (format) => {
+        return `${API_BASE}/rooms/export-inventory?format=${format}`;
     }
 };

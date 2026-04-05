@@ -285,7 +285,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
         setError('');
         const studentEmailRegex = /^[a-zA-Z]{2}\d{8}@my\.sliit\.lk$/i;
         if (!studentEmailRegex.test(formData.email)) {
-            setError('Please enter your official SLIIT student email (e.g., ITXXXXXXXX@my.sliit.lk)');
+            setError('Please enter your official SLIIT student email (e.g., ITXXXXXXXX@my.sliit.lk, BMXXXXXXXX@my.sliit.lk or SAXXXXXXXX@my.sliit.lk)');
             return;
         }
 
@@ -350,12 +350,14 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
             }
             const studentEmailRegex = /^[a-zA-Z]{2}\d{8}@my\.sliit\.lk$/i;
             if (!studentEmailRegex.test(formData.email)) {
-                setError('Please enter your official SLIIT student email (e.g., ITXXXXXXXX@my.sliit.lk or BMXXXXXXXX@my.sliit.lk)');
+                setError('Please enter your official SLIIT student email (e.g., ITXXXXXXXX@my.sliit.lk, BMXXXXXXXX@my.sliit.lk or SAXXXXXXXX@my.sliit.lk)');
                 setLoading(false);
                 return;
             }
-            const emailPrefix = (formData.email || '').split('@')[0].toUpperCase();
-            if ((formData.studentId || '').toUpperCase() !== emailPrefix) {
+            const emailPrefix = (formData.email || '').split('@')[0].trim().toUpperCase();
+            const sid = (formData.studentId || '').trim().toUpperCase();
+            
+            if (sid !== emailPrefix) {
                 setError(`Student ID must match email prefix (${emailPrefix})`);
                 setLoading(false);
                 return;
@@ -453,7 +455,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                                             <HiOutlineUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                             <input type="text" required
                                                 className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                                                placeholder="e.g. IT21000000 or BM21000000"
+                                                placeholder="e.g. IT21000000, BM21000000 or SA21000000"
                                                 value={formData.studentId}
                                                 onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
                                             />
