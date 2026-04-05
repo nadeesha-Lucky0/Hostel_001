@@ -6,16 +6,21 @@ const {
   createResource,
   updateResource,
   deleteResource,
-  allocateResource,
-  getAllocations,
-  returnResource,
+  getCommonAreaItems,
+  addCommonAreaItem,
+  updateCommonAreaItemStatus,
+  deleteCommonAreaItem,
 } = require("../controllers/resourceController.js");
 
+// ── Inventory routes ───────────────────────────────────────────────────────────
 router.route("/").get(getResources).post(createResource);
 router.route("/students").get(getStudents);
-router.route("/allocations").get(getAllocations);
-router.route("/allocate").post(allocateResource);
-router.route("/return/:id").post(returnResource);
 router.route("/:id").put(updateResource).delete(deleteResource);
+
+// ── Common Area routes ─────────────────────────────────────────────────────────
+router.get("/common-area", getCommonAreaItems);
+router.post("/common-area", addCommonAreaItem);
+router.patch("/common-area/:id/status", updateCommonAreaItemStatus);
+router.delete("/common-area/:id", deleteCommonAreaItem);
 
 module.exports = router;

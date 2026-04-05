@@ -13,6 +13,7 @@ import StudentComplaintChat from './pages/StudentComplaintChat'
 import Notices from './pages/Notices'
 import NoticeDetail from './pages/NoticeDetail'
 import Resources from './pages/Resources'
+import Profiles from './pages/Profiles'
 import { useState } from 'react'
 
 import StudentNavigationBar from './components/StudentNavigationBar'
@@ -149,6 +150,7 @@ function App() {
 
                     <Route path="/resources" element={<Resources />} />
                     <Route path="/warden/scan-records" element={<WardenScanRecords />} />
+                    <Route path="/profiles" element={<Profiles />} />
                     <Route path="/warden/settings" element={<StaffSettings />} />
                 </Route>
 

@@ -1153,9 +1153,11 @@ const ApplicationsView = ({ user, application: appProp, myAllocation, myClearanc
             return false;
         }
 
-        // Registration Number Validation: Must match email prefix
-        const emailPrefix = formData.studentEmail.split('@')[0].toUpperCase();
-        if (formData.registrationNumber.toUpperCase() !== emailPrefix) {
+        // Registration Number Validation: Must match email prefix (Trimmed and UpperCased)
+        const emailPrefix = (formData.studentEmail || '').split('@')[0].trim().toUpperCase();
+        const regNumber = (formData.registrationNumber || '').trim().toUpperCase();
+        
+        if (regNumber !== emailPrefix) {
             toast.error(`Registration Number must match your email ID (${emailPrefix}).`);
             return false;
         }
@@ -1427,7 +1429,12 @@ const ApplicationsView = ({ user, application: appProp, myAllocation, myClearanc
                             </h4>
                             <div className="grid md:grid-cols-2 gap-5">
                                 <Input label="Faculty" name="faculty" value={formData.faculty} onChange={handleChange} />
-                                <Input label="Degree / Course" name="studentDegree" value={formData.studentDegree} onChange={handleChange} />
+                                <Select label="Degree / Course" name="studentDegree" value={formData.studentDegree} onChange={handleChange} options={[
+                                    { label: 'Select Degree', value: '' },
+                                    { label: 'Information Technology (IT)', value: 'IT' },
+                                    { label: 'Business Management (BM)', value: 'BM' },
+                                    { label: 'Software Architecture (SA)', value: 'SA' }
+                                ]} required />
                                 <Input label="Year of Study" name="studentYear" value={formData.studentYear} onChange={handleChange} />
                                 <Input label="Registration Number" name="registrationNumber" value={formData.registrationNumber} onChange={handleChange} />
                             </div>

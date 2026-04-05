@@ -3,13 +3,12 @@ const mongoose = require('mongoose');
 const bedSchema = new mongoose.Schema({
     bedId: { type: String, enum: ['A', 'B'], required: true },
     isOccupied: { type: Boolean, default: false },
-    // We use ref to StudentPayment now that we have it
     student: { type: mongoose.Schema.Types.ObjectId, ref: 'StudentPayment', default: null }
 });
 
 const roomSchema = new mongoose.Schema({
     Roomid: { type: String, required: true, unique: true },
-    floorid: { type: String, required: true }, // Referencing Floor.floorID
+    floorid: { type: String, required: true },
     floor: { type: mongoose.Schema.Types.ObjectId, ref: 'Floor', required: true },
     floorNumber: { type: Number, required: true },
     wing: { type: String, enum: ['male', 'female'], required: true },

@@ -47,7 +47,7 @@ const sendSignupOTP = async (req, res) => {
         if (!studentEmailRegex.test(email)) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Invalid email: Must be a valid SLIIT student email (e.g., ITXXXXXXXX@my.sliit.lk)' 
+                message: 'Invalid email: Must be a valid SLIIT student email (e.g., ITXXXXXXXX@my.sliit.lk, BMXXXXXXXX@my.sliit.lk or SAXXXXXXXX@my.sliit.lk)' 
             });
         }
 
@@ -130,7 +130,7 @@ const register = async (req, res) => {
         if (!studentEmailRegex.test(email)) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Registration failed: Student email must be a valid SLIIT student address (e.g., ITXXXXXXXX@my.sliit.lk or BMXXXXXXXX@my.sliit.lk)' 
+                message: 'Registration failed: Student email must be a valid SLIIT student address (e.g., ITXXXXXXXX@my.sliit.lk, BMXXXXXXXX@my.sliit.lk or SAXXXXXXXX@my.sliit.lk)' 
             });
         }
 

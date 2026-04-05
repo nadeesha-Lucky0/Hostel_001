@@ -87,6 +87,7 @@ export default function NavigationBar() {
         { to: '/dashboard', icon: HiOutlineHome, label: 'Dashboard' },
         { to: '/room-management', icon: HiOutlineBuildingOffice2, label: 'Floor & Room' },
         { to: '/student-applications', icon: HiOutlineUserGroup, label: 'Allocations' },
+        { to: '/profiles', icon: HiOutlineUser, label: 'Profiles' },
         { to: '/records', icon: HiOutlineDocumentChartBar, label: 'Records' },
         { to: '/warden/scan-records', icon: HiOutlineArrowsRightLeft, label: 'In/Out Logs' },
         { to: '/resources', icon: HiOutlineCube, label: 'Resources' },
