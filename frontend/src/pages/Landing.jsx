@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/idHsN22NWk_logos.png';
+import doubleRoomImg from '../assets/20260422_002352.jpg';
+import heroBgImg from '../assets/IMG_3684.jpg';
+import aboutImg1 from '../assets/IMG_2172.jpg';
+import aboutImg2 from '../assets/IMG_2173.jpg';
 import AuthModal from '../components/AuthModal';
 import { api } from '../services/api';
 import {
@@ -26,7 +30,7 @@ const normalizeAttachments = (notice) => {
     return [];
 };
 
-const LandingSlideshow = ({ images }) => {
+const LandingSlideshow = ({ images, showNoticeBadge = true, className = "aspect-video" }) => {
     const [idx, setIdx] = useState(0);
     useEffect(() => {
         if (images.length <= 1) return;
@@ -35,7 +39,7 @@ const LandingSlideshow = ({ images }) => {
     }, [images.length]);
     if (images.length === 0) return null;
     return (
-        <div className="relative overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+        <div className={`relative overflow-hidden ${className}`}>
             {images.map((img, i) => (
                 <img key={i} src={img.url} alt={`Slide ${i + 1}`}
                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === idx ? 'opacity-100' : 'opacity-0'}`}
@@ -51,7 +55,9 @@ const LandingSlideshow = ({ images }) => {
                     ))}
                 </div>
             )}
-            <span className="absolute top-3 right-3 text-white text-[9px] font-black uppercase tracking-widest bg-black/40 px-2 py-1 rounded-full backdrop-blur-sm pointer-events-none">Read Notice ↗</span>
+            {showNoticeBadge && (
+                <span className="absolute top-3 right-3 text-white text-[9px] font-black uppercase tracking-widest bg-black/40 px-2 py-1 rounded-full backdrop-blur-sm pointer-events-none">Read Notice ↗</span>
+            )}
         </div>
     );
 };
@@ -84,8 +90,8 @@ const Landing = () => {
     };
 
     const stats = [
-        { label: 'Total Rooms', value: '450+', icon: HiOutlineBuildingOffice2 },
-        { label: 'Happy Students', value: '1200+', icon: HiOutlineUserGroup },
+        { label: 'Total Rooms', value: '300+', icon: HiOutlineBuildingOffice2 },
+        { label: 'Happy Students', value: '200+', icon: HiOutlineUserGroup },
         { label: 'Security Level', value: '24/7', icon: HiOutlineLockClosed },
         { label: 'Kandy Units', value: '02', icon: HiOutlineHome },
     ];
@@ -136,7 +142,7 @@ const Landing = () => {
                 <div
                     className="absolute inset-0 bg-cover bg-center z-0 scale-105"
                     style={{
-                        backgroundImage: `url('https://images.unsplash.com/photo-1555505019-8c3f1c4aba5f?q=80&w=2070&auto=format&fit=crop')`,
+                        backgroundImage: `url(${heroBgImg})`,
                     }}
                 />
                 <div className="absolute inset-0 z-10 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-slate-950/80 backdrop-blur-[3px]" />
@@ -211,14 +217,14 @@ const Landing = () => {
                                 <div className="flip-card-front backface-hidden absolute inset-0 bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200 border border-slate-100">
                                     <div className="h-2/3 overflow-hidden">
                                         <img
-                                            src="https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=2069&auto=format&fit=crop"
+                                            src="https://webasset.sliit.lk/web/6-On-Campus-SLIIT-Kandy-Uni-Hostel-(1)_1756279469.JPG"
                                             alt="Single Room"
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         />
                                     </div>
                                     <div className="p-8 text-center">
                                         <div className="inline-block px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-3">Premium Solo</div>
-                                        <h3 className="text-2xl font-black text-slate-900 mb-2">Single Luxury Room</h3>
+                                        <h3 className="text-2xl font-black text-slate-900 mb-2">Single Room</h3>
                                         <p className="text-slate-500 text-sm font-medium">Perfect for focused academic performance.</p>
                                     </div>
                                 </div>
@@ -228,7 +234,7 @@ const Landing = () => {
                                     <ul className="space-y-4 mb-8">
                                         <li className="flex items-center gap-3">
                                             <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px]">✓</div>
-                                            <span className="text-indigo-100/90 font-medium">Private A/C & Study Desk</span>
+                                            <span className="text-indigo-100/90 font-medium">Study Desk,Table & Cupboard</span>
                                         </li>
                                         <li className="flex items-center gap-3">
                                             <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px]">✓</div>
@@ -240,7 +246,7 @@ const Landing = () => {
                                         </li>
                                         <li className="flex items-center gap-3">
                                             <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px]">✓</div>
-                                            <span className="text-indigo-100/90 font-medium">High-speed Personal LAN</span>
+                                            <span className="text-indigo-100/90 font-medium">High-speed WIFI</span>
                                         </li>
                                     </ul>
                                     <button
@@ -260,7 +266,7 @@ const Landing = () => {
                                 <div className="flip-card-front backface-hidden absolute inset-0 bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200 border border-slate-100">
                                     <div className="h-2/3 overflow-hidden">
                                         <img
-                                            src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2071&auto=format&fit=crop"
+                                            src={doubleRoomImg}
                                             alt="Double Room"
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         />
@@ -277,7 +283,7 @@ const Landing = () => {
                                     <ul className="space-y-4 mb-8">
                                         <li className="flex items-center gap-3">
                                             <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px]">✓</div>
-                                            <span className="text-indigo-100/90 font-medium">Spacious Shared Balcony</span>
+                                            <span className="text-indigo-100/90 font-medium">Two Separate Beds</span>
                                         </li>
                                         <li className="flex items-center gap-3">
                                             <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px]">✓</div>
@@ -285,11 +291,11 @@ const Landing = () => {
                                         </li>
                                         <li className="flex items-center gap-3">
                                             <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px]">✓</div>
-                                            <span className="text-indigo-100/90 font-medium">Beds A & B Allocation</span>
+                                            <span className="text-indigo-100/90 font-medium">Two Separate Fans</span>
                                         </li>
                                         <li className="flex items-center gap-3">
                                             <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px]">✓</div>
-                                            <span className="text-indigo-100/90 font-medium">Extra Storage Cabinets</span>
+                                            <span className="text-indigo-100/90 font-medium">Two Separate Storage Cupboards</span>
                                         </li>
                                     </ul>
                                     <button
@@ -310,10 +316,10 @@ const Landing = () => {
                 <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
                     <div className="relative">
                         <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl shadow-indigo-500/20">
-                            <img
-                                src="https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=2070&auto=format&fit=crop"
-                                alt="Modern Living"
-                                className="w-full h-full object-cover"
+                            <LandingSlideshow 
+                                images={[{ url: aboutImg1 }, { url: aboutImg2 }]} 
+                                showNoticeBadge={false} 
+                                className="w-full h-full"
                             />
                         </div>
                         <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-indigo-600 rounded-3xl -z-10 animate-pulse"></div>
@@ -370,7 +376,7 @@ const Landing = () => {
                                 return (
                                     <div key={notice._id} className="min-w-[85vw] md:min-w-0 snap-start group bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:-translate-y-2 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer" onClick={() => navigate(`/notice/${notice._id}`)}>
                                         {/* Multi-photo auto-slideshow */}
-                                        {images.length > 0 && <LandingSlideshow images={images} />}
+                                        {images.length > 0 && <LandingSlideshow images={images} className="aspect-video" />}
 
                                         <div className="p-8 flex flex-col flex-grow">
                                             <div className="flex items-center gap-3 mb-5">
@@ -441,12 +447,26 @@ const Landing = () => {
                     <p className="text-indigo-100/60 text-lg mb-12 max-w-2xl mx-auto">
                         Our team is available 24/7 to help you with any issues or queries related to your stay.
                     </p>
-                    <button
-                        onClick={() => openAuth('login')}
-                        className="px-10 py-4 bg-white text-indigo-900 rounded-2xl text-base font-black shadow-2xl shadow-indigo-950/20 hover:scale-105 active:scale-95 transition-all"
-                    >
-                        Login to Help Center
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mt-12">
+                        <div className="flex items-center gap-3 text-white">
+                            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-xl backdrop-blur-md border border-white/10">
+                                <HiOutlinePhone />
+                            </div>
+                            <div className="text-left">
+                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-200/60">Call Us</div>
+                                <div className="text-lg font-bold text-white">+94 81 2 386 611</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 text-white">
+                            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-xl backdrop-blur-md border border-white/10">
+                                <HiOutlineEnvelope />
+                            </div>
+                            <div className="text-left">
+                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-200/60">Email Us</div>
+                                <div className="text-lg font-bold text-white">kandyofficer@sliit.lk</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -466,9 +486,9 @@ const Landing = () => {
                             </div>
                             <h3 className="font-bold text-lg text-slate-900 mb-2 leading-none">Our Location</h3>
                             <p className="text-slate-500 text-sm mt-3">
-                                SLIIT Kandy Uni, No. 670, <br />
-                                Peradeniya Rd, Kandy 20000, <br />
-                                Sri Lanka.
+                                SLIIT Kandy UNI, <br />
+                                Kengolla, Kundasale, <br />
+                                Kandy.
                             </p>
                         </div>
                         <div className="bg-slate-50 p-10 rounded-3xl border border-slate-100 text-center flex flex-col items-center">
