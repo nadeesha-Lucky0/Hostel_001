@@ -22,6 +22,12 @@ import {
     HiOutlineArrowDownTray,
     HiOutlinePhoto
 } from 'react-icons/hi2';
+import { 
+    FaFacebookF, 
+    FaInstagram, 
+    FaTiktok, 
+    FaYoutube 
+} from 'react-icons/fa';
 
 
 const normalizeAttachments = (notice) => {
@@ -165,7 +171,7 @@ const Landing = () => {
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <button
                             onClick={() => openAuth('login')}
-                            className="w-full sm:w-auto px-10 py-4 bg-[#FAB95B] text-[#1A3263] rounded-2xl text-base font-extrabold shadow-2xl shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto px-10 py-4 bg-white/20 backdrop-blur-xl text-white border border-white/30 rounded-2xl text-base font-extrabold shadow-2xl shadow-white/5 hover:bg-white/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
                         >
                             Get Started Now <HiOutlineArrowRight className="text-lg" />
                         </button>
@@ -471,89 +477,138 @@ const Landing = () => {
             </section>
 
             {/* Contact Us Section */}
-            <section id="contact" className="py-24 px-6 bg-white">
+            <section id="contact" className="py-32 px-6 bg-slate-50/50 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
-                        <div className="text-indigo-600 font-bold uppercase tracking-widest text-xs mb-4">Contact Us</div>
-                        <h2 className="text-4xl font-black text-slate-900 mb-4">Ready To Join Us?</h2>
-                        <p className="text-slate-500 font-medium">We're here to help you with any questions regarding your stay.</p>
+                    <div className="text-center mb-20">
+                        <div className="inline-block px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-6 border border-indigo-100">Get In Touch</div>
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">Ready To Join Our Community?</h2>
+                        <p className="text-slate-500 max-w-2xl mx-auto text-lg italic leading-relaxed">"Our team is dedicated to providing you with the best possible living experience. Reach out anytime."</p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
-                        <div className="bg-slate-50 p-10 rounded-3xl border border-slate-100 text-center flex flex-col items-center">
-                            <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                    <div className="grid md:grid-cols-3 gap-8 relative z-10">
+                        <div className="bg-white p-12 rounded-[2.5rem] border border-slate-100 text-center flex flex-col items-center shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group">
+                            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">
                                 <HiOutlineMapPin />
                             </div>
-                            <h3 className="font-bold text-lg text-slate-900 mb-2 leading-none">Our Location</h3>
-                            <p className="text-slate-500 text-sm mt-3">
+                            <h3 className="font-black text-xl text-slate-900 mb-4">Our Location</h3>
+                            <p className="text-slate-500 text-sm font-medium leading-relaxed">
                                 SLIIT Kandy UNI, <br />
                                 Kengolla, Kundasale, <br />
-                                Kandy.
+                                Kandy, Sri Lanka.
                             </p>
                         </div>
-                        <div className="bg-slate-50 p-10 rounded-3xl border border-slate-100 text-center flex flex-col items-center">
-                            <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                        <div className="bg-white p-12 rounded-[2.5rem] border border-slate-100 text-center flex flex-col items-center shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group">
+                            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">
                                 <HiOutlinePhone />
                             </div>
-                            <h3 className="font-bold text-lg text-slate-900 mb-2 leading-none">Phone Number</h3>
-                            <p className="text-slate-500 text-sm mt-3 mb-1">+94 81 2 386 611</p>
-                            <p className="text-slate-500 text-sm">+94 81 2 386 612</p>
+                            <h3 className="font-black text-xl text-slate-900 mb-4">Direct Contact</h3>
+                            <div className="space-y-2">
+                                <p className="text-slate-500 text-sm font-bold">+94 81 2 386 611</p>
+                                <p className="text-slate-500 text-sm font-bold">+94 81 2 386 612</p>
+                            </div>
                         </div>
-                        <div className="bg-slate-50 p-10 rounded-3xl border border-slate-100 text-center flex flex-col items-center">
-                            <div className="w-14 h-14 bg-cyan-50 text-cyan-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                        <div className="bg-white p-12 rounded-[2.5rem] border border-slate-100 text-center flex flex-col items-center shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group">
+                            <div className="w-16 h-16 bg-cyan-50 text-cyan-600 rounded-3xl flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform">
                                 <HiOutlineEnvelope />
                             </div>
-                            <h3 className="font-bold text-lg text-slate-900 mb-2 leading-none">Email Support</h3>
-                            <p className="text-slate-500 text-sm mt-3 mb-1">kandyofficer@sliit.lk</p>
-                            <p className="text-slate-500 text-sm">hostel.info@sliit.lk</p>
+                            <h3 className="font-black text-xl text-slate-900 mb-4">Email Support</h3>
+                            <div className="space-y-2">
+                                <p className="text-slate-500 text-sm font-bold">kandyofficer@sliit.lk</p>
+                                <p className="text-slate-500 text-sm font-bold">hostel.info@sliit.lk</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="py-16 px-6 bg-white border-t border-slate-100">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
-                    <div className="max-w-xs">
-                        <div className="flex items-center gap-3 mb-6">
-                            <img src={logo} alt="SLIIT Logo" className="w-14 h-10 object-contain" />
-                            <span className="text-xl font-black text-slate-900">SLIIT Kandy UNI</span>
+            <footer className="pt-16 pb-10 px-6 bg-slate-950 text-white overflow-hidden relative">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
+                
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                    <div className="lg:col-span-1">
+                        <div className="flex items-center gap-2.5 mb-6">
+                            <div className="p-1.5 bg-white rounded-lg">
+                                <img src={logo} alt="SLIIT Logo" className="w-10 h-6 object-contain" />
+                            </div>
+                            <span className="text-lg font-black tracking-tight">SLIIT Kandy <span className="text-indigo-400">UNI</span></span>
                         </div>
-                        <p className="text-slate-500 text-sm leading-relaxed font-medium">
-                            A modern management solution for a premium hostel experience in the hill capital.
-                            Built for students, by design.
+                        <p className="text-slate-400 text-[13px] leading-relaxed font-medium mb-6 max-w-[240px]">
+                            Empowering future engineers with a secure, collaborative living environment.
                         </p>
+                        <div className="flex gap-3">
+                            {[
+                                { icon: FaFacebookF, url: 'https://facebook.com/sliit.kandy', label: 'Facebook' }, // UPDATE FACEBOOK URL HERE
+                                { icon: FaInstagram, url: 'https://instagram.com/sliit.kandy', label: 'Instagram' }, // UPDATE INSTAGRAM URL HERE
+                                { icon: FaTiktok, url: 'https://tiktok.com/@sliit.kandy', label: 'TikTok' }, // UPDATE TIKTOK URL HERE
+                                { icon: FaYoutube, url: 'https://youtube.com/sliitkandy', label: 'YouTube' } // UPDATE YOUTUBE URL HERE
+                            ].map((social, i) => (
+                                <a 
+                                    key={i} 
+                                    href={social.url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:text-indigo-400 transition-all cursor-pointer"
+                                    title={social.label}
+                                >
+                                    <social.icon className="text-sm" />
+                                </a>
+                            ))}
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-12">
-                        <div>
-                            <h4 className="font-bold text-slate-900 mb-6 uppercase tracking-widest text-[10px]">Navigation</h4>
-                            <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                                <li><a href="#about" className="hover:text-indigo-600 transition-colors">About Us</a></li>
-                                <li><a href="#services" className="hover:text-indigo-600 transition-colors">Room Types</a></li>
-                                <li><a href="#notices" className="hover:text-indigo-600 transition-colors">Official Notices</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-slate-900 mb-6 uppercase tracking-widest text-[10px]">Resources</h4>
-                            <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                                <li><a href="#" className="hover:text-indigo-600 transition-colors">Guidelines</a></li>
-                                <li><a href="#" className="hover:text-indigo-600 transition-colors">FAQs</a></li>
-                                <li><a href="#" className="hover:text-indigo-600 transition-colors">Fee Structure</a></li>
-                            </ul>
-                        </div>
-                        <div className="hidden sm:block">
-                            <h4 className="font-bold text-slate-900 mb-6 uppercase tracking-widest text-[10px]">Legal</h4>
-                            <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                                <li><a href="#" className="hover:text-indigo-600 transition-colors">Privacy Policy</a></li>
-                                <li><a href="#" className="hover:text-indigo-600 transition-colors">Terms of Service</a></li>
-                            </ul>
-                        </div>
+                    <div>
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-6">Quick Navigation</h4>
+                        <ul className="space-y-3">
+                            {['About Us', 'Room Types', 'Official Notices', 'Contact Us'].map(item => (
+                                <li key={item}>
+                                    <a href={`#${item.toLowerCase().split(' ')[0]}`} className="text-slate-300 hover:text-white transition-colors text-xs font-bold flex items-center gap-2 group">
+                                        <span className="w-1 h-px bg-indigo-500 group-hover:w-3 transition-all"></span>
+                                        {item}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-6">Resources</h4>
+                        <ul className="space-y-3">
+                            {['Student Guidelines', 'Hostel FAQs', 'Fee Structure', 'Support'].map(item => (
+                                <li key={item}>
+                                    <a href="#" className="text-slate-300 hover:text-white transition-colors text-xs font-bold flex items-center gap-2 group">
+                                        <span className="w-1 h-px bg-indigo-500 group-hover:w-3 transition-all"></span>
+                                        {item}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-6">Legal & Privacy</h4>
+                        <ul className="space-y-3">
+                            {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map(item => (
+                                <li key={item}>
+                                    <a href="#" className="text-slate-300 hover:text-white transition-colors text-xs font-bold flex items-center gap-2 group">
+                                        <span className="w-1 h-px bg-indigo-500 group-hover:w-3 transition-all"></span>
+                                        {item}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto pt-16 mt-16 border-t border-slate-100 text-center">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">© 2026 SLIIT Kandy University Hostel. All rights reserved.</p>
+                <div className="max-w-7xl mx-auto pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">
+                        © 2026 SLIIT Kandy University Hostel.
+                    </p>
+                    <div className="flex gap-6">
+                        <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">v2.4.0</span>
+                        <span className="text-[9px] font-black text-indigo-500/60 uppercase tracking-widest">SECURE TLS 1.3</span>
+                    </div>
                 </div>
             </footer>
         </div>

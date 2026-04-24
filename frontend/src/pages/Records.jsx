@@ -295,7 +295,7 @@ export default function Records() {
             {isEditModalOpen && (
                 <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
                     <div className="modal dark:bg-slate-900 border dark:border-slate-800" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header border-b border-slate-100 dark:border-slate-800 pb-4">
+                        <div className="modal-header border-b border-slate-100 dark:border-slate-800 px-8 pb-4">
                             <div>
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">Update Allocation</h3>
                                 <p className="text-xs text-slate-400 font-medium">Manage student record and room assignment</p>
@@ -303,7 +303,7 @@ export default function Records() {
                             <button className="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors text-slate-400 dark:text-slate-500" onClick={() => setIsEditModalOpen(false)}><HiXMark className="text-xl" /></button>
                         </div>
 
-                        <div className="modal-body py-6 space-y-8 max-h-[70vh] overflow-y-auto">
+                        <div className="modal-body p-8 space-y-8 max-h-[70vh] overflow-y-auto">
                             {/* Centered Profile Section */}
                             <div className="profile-centered">
                                 <div className="name dark:text-white">{editingAllocation?.studentName}</div>
@@ -417,7 +417,7 @@ export default function Records() {
                             </div>
                         </div>
 
-                        <div className="modal-footer border-t border-slate-100 dark:border-slate-800 pt-4">
+                        <div className="modal-footer border-t border-slate-100 dark:border-slate-800 px-8 pt-4">
                             <button className="btn btn-ghost h-12 px-6 rounded-xl font-bold" onClick={() => setIsEditModalOpen(false)}>Close</button>
                             <button
                                 className="btn btn-primary h-12 px-8 rounded-xl font-bold shadow-xl shadow-amber-500/20 hover:shadow-amber-500/40 transform transition-all active:scale-95 disabled:grayscale disabled:opacity-50"

@@ -41,6 +41,12 @@ function validateApplicationData(payload) {
   if (payload.emergencyContactPhone && !isValidTenDigitContact(payload.emergencyContactPhone)) {
     return "emergencyContactPhone must be exactly 10 digits.";
   }
+  if (payload.studentYear && !/^[1-4]$/.test(payload.studentYear)) {
+    return "Year of Study must be 1, 2, 3, or 4.";
+  }
+  if (payload.durationOfStay && !/^\d+$/.test(payload.durationOfStay)) {
+    return "Duration of Stay must be a valid number of months.";
+  }
   return null;
 }
 
@@ -409,6 +415,12 @@ async function allocateRoom(req, res) {
 async function updateApplication(req, res) {
   try {
     const updates = req.body;
+
+    const validationError = validateApplicationData(updates);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
+
     const before = await Application.findById(req.params.id);
     const app = await Application.findByIdAndUpdate(req.params.id, updates, { returnDocument: 'after' });
 
@@ -515,6 +527,11 @@ async function deleteMyApplication(req, res) {
     // Use robust 3-layer lookup
     const existing = await findMyApplication(req.user.id, null);
     if (!existing) return res.status(404).json({ error: "No application found for this student" });
+
+    // Block deletion if application is already Activated
+    if (existing.applicationStatus === "Activated") {
+      return res.status(403).json({ error: "Your profile is already activated. You cannot delete your application form." });
+    }
 
     // Delete Cloudinary files
     if (existing.medicalReportPublicId) {

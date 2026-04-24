@@ -1078,6 +1078,14 @@ const ApplicationsView = ({ user, application: appProp, myAllocation, myClearanc
             setFormData(prev => ({ ...prev, gender: value, preferredHostel: autoHostel }));
         } else if (name === 'nic') {
             setFormData(prev => ({ ...prev, nic: value.toUpperCase() }));
+        } else if (name === 'studentYear') {
+            // Only allow 1, 2, 3, 4
+            if (/^[1-4]?$/.test(value)) {
+                setFormData(prev => ({ ...prev, studentYear: value }));
+            }
+        } else if (name === 'durationOfStay') {
+            // Only allow digits
+            setFormData(prev => ({ ...prev, durationOfStay: value.replace(/\D/g, '') }));
         } else {
             setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
         }
@@ -1159,6 +1167,16 @@ const ApplicationsView = ({ user, application: appProp, myAllocation, myClearanc
         
         if (regNumber !== emailPrefix) {
             toast.error(`Registration Number must match your email ID (${emailPrefix}).`);
+            return false;
+        }
+
+        // Year and Duration must be integers
+        if (formData.studentYear && !/^[1-4]$/.test(formData.studentYear)) {
+            toast.error('Year of Study must be 1, 2, 3, or 4.');
+            return false;
+        }
+        if (formData.durationOfStay && !/^\d+$/.test(formData.durationOfStay)) {
+            toast.error('Duration of Stay must be a valid number of months.');
             return false;
         }
 
@@ -1359,9 +1377,13 @@ const ApplicationsView = ({ user, application: appProp, myAllocation, myClearanc
 
                     {/* Action buttons */}
                     <div className="px-8 py-6 bg-slate-50/80 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
-                        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Only you can edit or delete this application.</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+                            {localApp.applicationStatus === 'Activated' 
+                                ? "Your profile is activated. You can still update details, but deletion is disabled." 
+                                : "Only you can edit or delete this application."}
+                        </p>
                         <div className="flex gap-3">
-                            {showDeleteConfirm ? (
+                            {localApp.applicationStatus !== 'Activated' && showDeleteConfirm ? (
                                 <div className="flex items-center gap-3 bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-900/30 rounded-2xl px-4 py-2.5">
                                     <span className="text-rose-700 dark:text-rose-400 font-bold text-sm">Delete permanently?</span>
                                     <button onClick={handleDelete} disabled={submitting} className="px-4 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-black hover:bg-rose-700 transition-all disabled:opacity-60">{submitting ? 'Deleting...' : 'Yes, Delete'}</button>
@@ -1369,13 +1391,15 @@ const ApplicationsView = ({ user, application: appProp, myAllocation, myClearanc
                                 </div>
                             ) : (
                                 <>
-                                    <button
-                                        onClick={() => setShowDeleteConfirm(true)}
-                                        className="px-5 py-3 border-2 border-rose-200 dark:border-rose-900/30 text-rose-500 dark:text-rose-400 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-rose-50 dark:hover:bg-rose-900/40 hover:border-rose-300 dark:hover:border-rose-900/60 transition-all"
-                                    >
-                                        <HiOutlineTrash className="text-base" />
-                                        Delete Form
-                                    </button>
+                                    {localApp.applicationStatus !== 'Activated' && (
+                                        <button
+                                            onClick={() => setShowDeleteConfirm(true)}
+                                            className="px-5 py-3 border-2 border-rose-200 dark:border-rose-900/30 text-rose-500 dark:text-rose-400 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-rose-50 dark:hover:bg-rose-900/40 hover:border-rose-300 dark:hover:border-rose-900/60 transition-all"
+                                        >
+                                            <HiOutlineTrash className="text-base" />
+                                            Delete Form
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => setIsEditing(true)}
                                         className="px-7 py-3 bg-indigo-600 text-white rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-indigo-700 hover:shadow-lg dark:hover:shadow-none hover:-translate-y-0.5 transition-all"
@@ -1459,7 +1483,7 @@ const ApplicationsView = ({ user, application: appProp, myAllocation, myClearanc
                                     { label: 'Double', value: 'double' },
                                     { label: 'Triple', value: 'triple' }
                                 ]} required />
-                                <Input label="Duration of Stay" name="durationOfStay" value={formData.durationOfStay} onChange={handleChange} />
+                                <Input label="Duration of Stay (Months)" name="durationOfStay" value={formData.durationOfStay} onChange={handleChange} />
                             </div>
                         </section>
 
