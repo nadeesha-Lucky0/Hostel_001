@@ -11,7 +11,7 @@ import {
   HiOutlineTrash
 } from 'react-icons/hi2';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 const statusConfig = {
   open: { label: 'Open', color: 'bg-red-100 text-red-700', dot: 'bg-red-500' },
