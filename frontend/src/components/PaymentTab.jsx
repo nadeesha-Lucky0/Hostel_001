@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
     HiOutlineCurrencyDollar,
     HiOutlineDocumentArrowUp,
@@ -12,7 +13,8 @@ import {
     HiOutlineUser,
     HiOutlinePencilSquare,
     HiOutlineXMark,
-    HiOutlineTrash
+    HiOutlineTrash,
+    HiOutlineArrowDownTray
 } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
 
@@ -30,6 +32,264 @@ const PaymentTab = ({ user }) => {
     const [editAmount, setEditAmount] = useState('');
     const [editFile, setEditFile] = useState(null);
     const editFileRef = useRef(null);
+
+    // Receipt Modal State
+    const [showReceiptModal, setShowReceiptModal] = useState(false);
+    const [activeReceipt, setActiveReceipt] = useState(null);
+
+    const handleShowReceipt = (receipt) => {
+        setActiveReceipt(receipt);
+        setShowReceiptModal(true);
+    };
+
+    const handlePrint = () => {
+        if (!activeReceipt) return;
+
+        // Create an iframe element
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        document.body.appendChild(iframe);
+
+        const doc = iframe.contentWindow.document;
+        
+        const monthsStr = activeReceipt.paymentType === 'Refundable' ? 'Refundable Deposit' : (activeReceipt.months?.join(', ') || activeReceipt.month || 'N/A');
+        const academicYear = activeReceipt.paymentType === 'Refundable' ? (activeReceipt.submittedDate ? new Date(activeReceipt.submittedDate).getFullYear() : new Date().getFullYear()) : (activeReceipt.year || 'N/A');
+        const amountStr = `LKR ${activeReceipt.amount?.toLocaleString()}`;
+        const submissionDate = activeReceipt.submittedDate ? new Date(activeReceipt.submittedDate).toLocaleDateString() : 'N/A';
+        const receiptNo = activeReceipt._id || 'N/A';
+        const studentName = initialData?.studentName || user?.name || 'N/A';
+        const rollNo = initialData?.rollNumber || 'N/A';
+        const wing = initialData?.wing || 'N/A';
+        const roomType = initialData?.roomType || 'N/A';
+
+        const receiptHtml = `
+            <html>
+            <head>
+                <title>Payment Receipt - ${receiptNo}</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+                    body {
+                        font-family: 'Inter', system-ui, sans-serif;
+                        color: #1e293b;
+                        background: #fff;
+                        padding: 30px;
+                        margin: 0;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    .receipt-card {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 24px;
+                        padding: 35px;
+                        background: #ffffff;
+                    }
+                    .header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        border-bottom: 2px dashed #e2e8f0;
+                        padding-bottom: 20px;
+                        margin-bottom: 25px;
+                    }
+                    .logo-title {
+                        color: #1a3263;
+                        font-weight: 900;
+                        font-size: 20px;
+                        margin: 0;
+                    }
+                    .logo-sub {
+                        color: #64748b;
+                        font-size: 11px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        margin-top: 2px;
+                    }
+                    .status-badge {
+                        background: #d1fae5;
+                        color: #065f46;
+                        border: 1px solid #a7f3d0;
+                        padding: 6px 14px;
+                        border-radius: 10px;
+                        font-size: 11px;
+                        font-weight: 900;
+                        text-transform: uppercase;
+                    }
+                    .section-title {
+                        font-size: 10px;
+                        font-weight: 800;
+                        text-transform: uppercase;
+                        letter-spacing: 0.1em;
+                        color: #94a3b8;
+                        margin-bottom: 10px;
+                    }
+                    .info-grid {
+                        display: grid;
+                        grid-template-cols: 1fr 1fr;
+                        gap: 15px;
+                        margin-bottom: 25px;
+                    }
+                    .info-item {
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .info-item label {
+                        font-size: 9px;
+                        font-weight: 800;
+                        text-transform: uppercase;
+                        color: #64748b;
+                        margin-bottom: 2px;
+                    }
+                    .info-item span {
+                        font-size: 13px;
+                        font-weight: 700;
+                        color: #0f172a;
+                    }
+                    .payment-details {
+                        background: #f8fafc;
+                        border-radius: 16px;
+                        padding: 20px;
+                        margin-bottom: 25px;
+                        border: 1px solid #f1f5f9;
+                    }
+                    .detail-row {
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 8px 0;
+                        border-bottom: 1px solid #e2e8f0;
+                    }
+                    .detail-row:last-child {
+                        border-bottom: none;
+                        padding-top: 10px;
+                    }
+                    .detail-row label {
+                        font-size: 11px;
+                        font-weight: 600;
+                        color: #64748b;
+                    }
+                    .detail-row span {
+                        font-size: 11px;
+                        font-weight: 700;
+                        color: #0f172a;
+                    }
+                    .detail-row.total label {
+                        font-size: 13px;
+                        font-weight: 800;
+                        color: #1e293b;
+                    }
+                    .detail-row.total span {
+                        font-size: 16px;
+                        font-weight: 900;
+                        color: #10b981;
+                    }
+                    .footer-note {
+                        text-align: center;
+                        font-size: 9px;
+                        color: #94a3b8;
+                        font-weight: 600;
+                        line-height: 1.4;
+                        margin-top: 30px;
+                        border-top: 1px solid #e2e8f0;
+                        padding-top: 15px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="receipt-card">
+                    <div class="header">
+                        <div>
+                            <h1 class="logo-title">SMART HOSTEL</h1>
+                            <div class="logo-sub">Official Payment Receipt</div>
+                        </div>
+                        <div class="status-badge">${activeReceipt.status}</div>
+                    </div>
+                    
+                    <div class="section-title">Student Details</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Student Name</label>
+                            <span>${studentName}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Roll Number</label>
+                            <span>${rollNo}</span>
+                        </div>
+                        <div class="info-item" style="grid-column: span 2;">
+                            <label>Room Allocation</label>
+                            <span>${wing} - Room Type: ${roomType}</span>
+                        </div>
+                        <div class="info-item" style="grid-column: span 2;">
+                            <label>Receipt Number</label>
+                            <span style="font-family: monospace; font-size: 11px;">${receiptNo}</span>
+                        </div>
+                    </div>
+
+                    <div class="section-title">Payment Summary</div>
+                    <div class="payment-details">
+                        <div class="detail-row">
+                            <label>Academic Year</label>
+                            <span>${academicYear}</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>${activeReceipt.paymentType === 'Refundable' ? 'Payment Type' : 'Months Paid'}</label>
+                            <span>${monthsStr}</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Submission Date</label>
+                            <span>${submissionDate}</span>
+                        </div>
+                        <div class="detail-row total">
+                            <label>Total Amount Paid</label>
+                            <span>${amountStr}</span>
+                        </div>
+                    </div>
+
+                    <div class="footer-note">
+                        This is an official system-generated payment receipt for the Smart Hostel Management System.<br>
+                        Generated on ${new Date().toLocaleString()} | Secured & Verified System Record
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        doc.open();
+        doc.write(receiptHtml);
+        doc.close();
+
+        // Wait for content to load before triggering print
+        iframe.onload = () => {
+            setTimeout(() => {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+                setTimeout(() => {
+                    if (document.body.contains(iframe)) {
+                        document.body.removeChild(iframe);
+                    }
+                }, 1000);
+            }, 300);
+        };
+        
+        // Backup direct trigger
+        setTimeout(() => {
+            if (document.body.contains(iframe)) {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+                setTimeout(() => {
+                    if (document.body.contains(iframe)) {
+                        document.body.removeChild(iframe);
+                    }
+                }, 1000);
+            }
+        }, 500);
+    };
 
     // Refundable Form State
     const [refundableAmount, setRefundableAmount] = useState('');
@@ -302,7 +562,8 @@ const PaymentTab = ({ user }) => {
     const isRefundableSubmitted = paymentStatus?.refundPayment?.documentUrl && (paymentStatus.refund_status !== 'Rejected' && paymentStatus.refundPayment.paymentStatus !== 'Rejected');
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 p-4 md:p-8 animate-in fade-in duration-500">
+        <>
+            <div className="max-w-6xl mx-auto space-y-8 p-4 md:p-8 animate-in fade-in duration-500">
             {/* ── Student Information ── */}
             <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden relative transition-all">
                 <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-3">
@@ -323,7 +584,7 @@ const PaymentTab = ({ user }) => {
 
             <div className="grid lg:grid-cols-2 gap-8">
                 {/* ── Refundable Payment Section ── */}
-                <div className={`bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-sm border border-slate-100 dark:border-slate-800 transition-all ${isRefundableSubmitted ? 'opacity-60 grayscale-[0.5]' : ''}`}>
+                <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-sm border border-slate-100 dark:border-slate-800 transition-all">
                     <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-3">
                         <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
                             <HiOutlineCurrencyDollar />
@@ -349,17 +610,33 @@ const PaymentTab = ({ user }) => {
                                 {/* Refund Status Badge */}
                                 <div className="flex flex-col items-center gap-1.5 w-full pt-2 border-t border-emerald-100/50 dark:border-emerald-900/30">
                                     <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Refund Status</span>
-                                    <div className={`px-6 py-2 rounded-2xl font-black text-[11px] uppercase tracking-wider border-2 ${paymentStatus.refund_status === 'Accepted' ? 'bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-100 dark:shadow-none' :
-                                            paymentStatus.refund_status === 'Rejected' ? 'bg-rose-500 text-white border-rose-400 shadow-lg shadow-rose-100 dark:shadow-none' :
-                                                'bg-amber-400 text-amber-900 border-amber-300 shadow-lg shadow-amber-100 dark:shadow-none'
-                                        }`}>
-                                        {paymentStatus.refund_status || 'Pending'}
+                                    <div className="flex items-center gap-3">
+                                        <div className={`px-6 py-2 rounded-2xl font-black text-[11px] uppercase tracking-wider border-2 ${paymentStatus.refund_status === 'Accepted' ? 'bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-100 dark:shadow-none' :
+                                                paymentStatus.refund_status === 'Rejected' ? 'bg-rose-500 text-white border-rose-400 shadow-lg shadow-rose-100 dark:shadow-none' :
+                                                    'bg-amber-400 text-amber-900 border-amber-300 shadow-lg shadow-amber-100 dark:shadow-none'
+                                            }`}>
+                                            {paymentStatus.refund_status || 'Pending'}
+                                        </div>
+                                        {paymentStatus.refund_status === 'Accepted' && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleShowReceipt({
+                                                    ...paymentStatus.refundPayment,
+                                                    paymentType: 'Refundable',
+                                                    status: 'Accepted',
+                                                    _id: paymentStatus.refundPayment._id || paymentStatus._id || 'N/A'
+                                                })}
+                                                className="w-10 h-10 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-md shadow-emerald-100 dark:shadow-none shrink-0"
+                                                title="Download Payment Receipt"
+                                            >
+                                                <HiOutlineArrowDownTray className="text-lg" />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                             {paymentStatus.refund_status === 'Accepted' && (
-                                <div className="mt-4 p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-[2rem] text-emerald-700 dark:text-emerald-400 font-bold text-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-700">
-                                    <span className="text-2xl text-emerald-500"></span>
+                                <div className="mt-4 p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-[2rem] text-emerald-700 dark:text-emerald-400 font-bold text-sm flex items-center justify-center text-center gap-3 animate-in fade-in slide-in-from-top-2 duration-700">
                                     <span>Refundable is successful. Check your bank account!</span>
                                 </div>
                             )}
@@ -637,6 +914,15 @@ const PaymentTab = ({ user }) => {
                                             <span>Update</span>
                                         </button>
                                     )}
+                                    {m.status === 'Accepted' && (
+                                        <button
+                                            onClick={() => handleShowReceipt(m)}
+                                            className="w-10 h-10 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-md shadow-emerald-100 dark:shadow-none shrink-0"
+                                            title="Download Payment Proof"
+                                        >
+                                            <HiOutlineArrowDownTray className="text-lg" />
+                                        </button>
+                                    )}
                                     <a
                                         href={m.documentUrl}
                                         target="_blank"
@@ -652,10 +938,11 @@ const PaymentTab = ({ user }) => {
                     </div>
                 </div>
             )}
+            </div>
 
             {/* ── Edit Monthly Submission Modal ── */}
-            {showEditModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+            {showEditModal && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
                     <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-300">
                         <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -758,9 +1045,131 @@ const PaymentTab = ({ user }) => {
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
-        </div>
+
+            {/* ── Payment Receipt Modal ── */}
+            {showReceiptModal && activeReceipt && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300 no-print">
+                    <style dangerouslySetInnerHTML={{__html: `
+                        @media print {
+                            body * {
+                                visibility: hidden !important;
+                            }
+                            #printable-receipt, #printable-receipt * {
+                                visibility: visible !important;
+                                color: #0f172a !important;
+                            }
+                            #printable-receipt {
+                                position: fixed !important;
+                                left: 0 !important;
+                                top: 0 !important;
+                                width: 100% !important;
+                                height: 100% !important;
+                                margin: 0 !important;
+                                padding: 40px !important;
+                                background: white !important;
+                                border: none !important;
+                                z-index: 99999 !important;
+                            }
+                            .no-print {
+                                display: none !important;
+                            }
+                        }
+                    `}} />
+                    <div id="printable-receipt" className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-300">
+                        {/* Header / Brand */}
+                        <div className="p-8 border-b-2 border-dashed border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl text-emerald-600 dark:text-emerald-400">
+                                    <HiOutlineCheckCircle className="text-3xl" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">SMART HOSTEL</h3>
+                                    <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Official Payment Receipt</p>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <span className="px-4 py-2 bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase tracking-wider shadow-lg shadow-emerald-500/20">
+                                    {activeReceipt.status}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Content Details */}
+                        <div className="p-8 space-y-6">
+                            <div>
+                                <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-3">Student Details</span>
+                                <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                    <div>
+                                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block">Student Name</span>
+                                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{initialData?.studentName || user?.name || 'N/A'}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block">Roll Number</span>
+                                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{initialData?.rollNumber || 'N/A'}</span>
+                                    </div>
+                                    <div className="col-span-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block">Room Allocation</span>
+                                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{initialData?.wing || 'N/A'} (Room Type: <span className="capitalize">{initialData?.roomType || 'N/A'}</span>)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-3">Payment Summary</span>
+                                <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
+                                    <div className="flex justify-between">
+                                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{activeReceipt.paymentType === 'Refundable' ? 'Payment Type:' : 'Payment Period:'}</span>
+                                        <span className="text-xs font-black text-slate-800 dark:text-slate-200">
+                                            {activeReceipt.paymentType === 'Refundable' 
+                                                ? 'Refundable Deposit' 
+                                                : `${activeReceipt.months?.join(', ') || activeReceipt.month} ${activeReceipt.year}`}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Submission Date:</span>
+                                        <span className="text-xs font-black text-slate-800 dark:text-slate-200">{activeReceipt.submittedDate ? new Date(activeReceipt.submittedDate).toLocaleDateString() : 'N/A'}</span>
+                                    </div>
+                                    <div className="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                                        <span className="text-sm font-black text-slate-800 dark:text-white">Amount Paid:</span>
+                                        <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">LKR {activeReceipt.amount?.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="text-center pt-2">
+                                <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block leading-relaxed">
+                                    This is an official system-generated secure payment proof receipt.<br/>
+                                    Verified & Protected by Smart Hostel Admin Portal.
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="p-8 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex gap-4 no-print">
+                            <button
+                                type="button"
+                                onClick={() => setShowReceiptModal(false)}
+                                className="flex-1 py-4 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black text-xs hover:bg-slate-300 dark:hover:bg-slate-700 transition-all uppercase tracking-widest"
+                            >
+                                Close
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handlePrint()}
+                                className="flex-[2] py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs transition-all shadow-xl shadow-indigo-100 dark:shadow-none flex items-center justify-center gap-3 uppercase tracking-widest"
+                            >
+                                <HiOutlineDocumentText className="text-lg" />
+                                Download PDF / Print
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+        </>
     );
 };
 

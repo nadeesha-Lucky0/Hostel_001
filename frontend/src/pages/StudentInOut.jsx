@@ -19,31 +19,55 @@ const StudentInOut = () => {
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
+        let isMounted = true;
         const loadState = async () => {
             try {
                 const token = user?.token || sessionStorage.getItem('hostel_token');
-                const allocRes = await fetch('/api/allocations/me', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const allocData = await allocRes.json();
-                if (!allocData.success) {
-                    setIsAllocated(false);
-                    setLoading(false);
-                    return;
+                let allocated = false;
+
+                try {
+                    const allocRes = await fetch('/api/allocations/me', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const allocData = await allocRes.json();
+                    allocated = allocData.success && !!allocData.data;
+                } catch (_) {}
+
+                if (!allocated) {
+                    try {
+                        const appRes = await fetch('/api/applications/me', {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                        const appData = await appRes.json();
+                        if (appData && (appData.assignedRoom || ['Room Allocated', 'Activated'].includes(appData.applicationStatus))) {
+                            allocated = true;
+                        }
+                    } catch (_) {}
                 }
 
-                setIsAllocated(true);
-                const qrData = await fetchMyQrStatus(token);
-                setStatus(qrData.status || '');
+                if (!isMounted) return;
+
+                if (allocated) {
+                    setIsAllocated(true);
+                    try {
+                        const qrData = await fetchMyQrStatus(token);
+                        if (isMounted) setStatus(qrData.status || 'INSIDE');
+                    } catch (qrErr) {
+                        console.error('Error fetching QR status:', qrErr);
+                        if (isMounted) setStatus('INSIDE');
+                    }
+                } else {
+                    setIsAllocated(false);
+                }
             } catch (err) {
                 console.error('QR student page error:', err);
-                setIsAllocated(false);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
 
         loadState();
+        return () => { isMounted = false; };
     }, [user?.token]);
 
     const refreshStatus = async () => {
@@ -66,7 +90,7 @@ const StudentInOut = () => {
         setSubmitting(true);
         try {
             await submitQrScan({
-                studentId: user?.studentId,
+                studentId: user?.studentId || user?.email || user?.name || 'STUDENT',
                 action: 'EXIT',
                 destination: destination.trim(),
                 goingHome,
@@ -94,7 +118,7 @@ const StudentInOut = () => {
         setSubmitting(true);
         try {
             await submitQrScan({
-                studentId: user?.studentId,
+                studentId: user?.studentId || user?.email || user?.name || 'STUDENT',
                 action: 'ENTRY',
                 securityPin
             }, user?.token || sessionStorage.getItem('hostel_token'));
@@ -169,7 +193,7 @@ const StudentInOut = () => {
                                         <HiOutlineIdentification className="text-lg" />
                                         Student ID
                                     </label>
-                                    <input value={user?.studentId || ''} readOnly className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 font-bold text-slate-700 dark:text-slate-200" />
+                                    <input value={user?.studentId || user?.email || ''} readOnly className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 font-bold text-slate-700 dark:text-slate-200" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -229,7 +253,7 @@ const StudentInOut = () => {
                                         <HiOutlineIdentification className="text-lg" />
                                         Student ID
                                     </label>
-                                    <input value={user?.studentId || ''} readOnly className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 font-bold text-slate-700 dark:text-slate-200" />
+                                    <input value={user?.studentId || user?.email || ''} readOnly className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 font-bold text-slate-700 dark:text-slate-200" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">

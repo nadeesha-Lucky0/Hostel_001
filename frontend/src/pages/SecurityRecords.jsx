@@ -69,7 +69,7 @@ const SecurityRecords = () => {
             new Date(l.timestamp).toLocaleTimeString(),
             l.studentUserId?.name || 'N/A',
             l.studentId,
-            l.action.toUpperCase(),
+            (l.action || '').toUpperCase(),
             l.destination || 'N/A'
         ]);
 

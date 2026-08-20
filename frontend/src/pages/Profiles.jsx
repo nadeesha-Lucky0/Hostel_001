@@ -415,6 +415,7 @@ function PaymentViewWarden({ submissions, handlePaymentStatus, setViewingHistory
 
     const pending = filterSubmissions(submissions.filter(s => s.status === 'Pending'))
     const approved = submissions.filter(s => s.status === 'Accepted')
+    const rejected = filterSubmissions(submissions.filter(s => s.status === 'Rejected'))
 
     // Get unique students from approved submissions
     const approvedStudents = []
@@ -462,20 +463,26 @@ function PaymentViewWarden({ submissions, handlePaymentStatus, setViewingHistory
                         >
                             Approved ({filteredApproved.length})
                         </button>
+                        <button
+                            onClick={() => setSubTab('rejected')}
+                            className={`px-6 py-2 rounded-lg text-[10px] font-black transition-all border-none cursor-pointer uppercase tracking-wider ${subTab === 'rejected' ? 'bg-[#FAB95B] text-[#1A3263] shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                        >
+                            Rejected ({rejected.length})
+                        </button>
                     </div>
 
                     <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-1 hidden md:block" />
 
                     <div className="flex items-center gap-2">
                         <button 
-                            onClick={() => downloadSecureFile(api.getMonthlySubmissionsExportUrl('csv', { search: searchTerm, status: subTab === 'pending' ? 'Pending' : 'Accepted' }), `MonthlyPayments_${new Date().toLocaleDateString()}.csv`)}
+                            onClick={() => downloadSecureFile(api.getMonthlySubmissionsExportUrl('csv', { search: searchTerm, status: subTab === 'pending' ? 'Pending' : subTab === 'approved' ? 'Accepted' : 'Rejected' }), `MonthlyPayments_${new Date().toLocaleDateString()}.csv`)}
                             className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border-none cursor-pointer"
                             title="Export to CSV"
                         >
                             <HiOutlineTableCells className="text-lg" /> CSV
                         </button>
                         <button 
-                            onClick={() => downloadSecureFile(api.getMonthlySubmissionsExportUrl('pdf', { search: searchTerm, status: subTab === 'pending' ? 'Pending' : 'Accepted' }), `MonthlyPayments_${new Date().toLocaleDateString()}.pdf`)}
+                            onClick={() => downloadSecureFile(api.getMonthlySubmissionsExportUrl('pdf', { search: searchTerm, status: subTab === 'pending' ? 'Pending' : subTab === 'approved' ? 'Accepted' : 'Rejected' }), `MonthlyPayments_${new Date().toLocaleDateString()}.pdf`)}
                             className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border-none cursor-pointer"
                             title="Export to PDF"
                         >
@@ -549,6 +556,67 @@ function PaymentViewWarden({ submissions, handlePaymentStatus, setViewingHistory
                                                         title="Reject"
                                                     >
                                                         <HiOutlineXCircle className="text-lg" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </>
+                        ) : subTab === 'rejected' ? (
+                            <>
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th className="text-center">Wing</th>
+                                        <th className="text-center">Roll Number</th>
+                                        <th className="text-center">Months</th>
+                                        <th className="text-center">Amount</th>
+                                        <th className="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                                    {rejected.length === 0 ? (
+                                        <tr><td colSpan="6" className="text-center py-20 text-slate-400 font-bold italic">No rejected payments found</td></tr>
+                                    ) : rejected.map(sub => (
+                                        <tr key={sub.submissionId} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                                            <td>
+                                                <div className="font-black text-slate-800 dark:text-slate-200">{sub.studentName}</div>
+                                                <div className="text-[11px] text-slate-400 dark:text-slate-300 italic">{sub.email}</div>
+                                            </td>
+                                            <td className="text-center">
+                                                <span className={`badge ${sub.wing === 'male' ? 'badge-info' : 'badge-neutral'}`}>
+                                                    {sub.wing === 'male' ? 'Male' : 'Female'}
+                                                </span>
+                                            </td>
+                                            <td className="text-center"><span className="badge badge-neutral">{sub.rollNumber}</span></td>
+                                            <td className="text-center">
+                                                <div className="flex flex-wrap gap-1 justify-center">
+                                                    {sub.months?.map(m => (
+                                                        <span key={m} className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 rounded-lg text-[10px] font-black uppercase tracking-tighter">
+                                                            {m.substring(0, 3)}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </td>
+                                            <td className="text-center font-black text-slate-700 dark:text-slate-300">LKR {sub.amount?.toLocaleString()}</td>
+                                            <td className="text-center">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <a
+                                                        href={sub.documentUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                                                        title="View Receipt"
+                                                    >
+                                                        <HiOutlineDocumentText className="text-lg" />
+                                                    </a>
+                                                    <button
+                                                        onClick={() => handlePaymentStatus(sub.studentId, sub.submissionId, 'Accepted')}
+                                                        className="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:emerald-400 rounded-xl border-none cursor-pointer hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                                                        title="Approve"
+                                                    >
+                                                        <HiOutlineCheckCircle className="text-lg" />
                                                     </button>
                                                 </div>
                                             </td>

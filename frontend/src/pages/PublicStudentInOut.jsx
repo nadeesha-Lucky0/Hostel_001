@@ -25,7 +25,7 @@ const PublicStudentInOut = () => {
     };
 
     const handleContinue = async () => {
-        const value = studentIdInput.trim().toUpperCase();
+        const value = (studentIdInput || '').trim().toUpperCase();
         if (!value) {
             toast.error('Student ID is required');
             return;

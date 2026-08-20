@@ -11,7 +11,7 @@ function isValidSriLankanNic(nic) {
 function isValidRollPrefixForGender(roll, gender) {
   if (!roll || !gender) return false;
   const expectedPrefix = gender.toLowerCase() === "male" ? "M" : "F";
-  return roll.toUpperCase().startsWith(expectedPrefix);
+  return (roll || "").toUpperCase().startsWith(expectedPrefix);
 }
 
 function isValidSliitEmail(email) {

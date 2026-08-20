@@ -466,7 +466,7 @@ const StudentDashboard = () => {
                     onRefresh={() => { fetchApplication(); fetchClearanceData(); }}
                 />
             )}
-            {activeTab === 'in-out' && <InOutView status={myStatus} onRefresh={fetchMyStatus} isAllocated={!!myAllocation} />}
+            {activeTab === 'in-out' && <InOutView status={myStatus} onRefresh={fetchMyStatus} isAllocated={!!myAllocation || !!(application?.assignedRoom || ['Room Allocated', 'Activated'].includes(application?.applicationStatus))} />}
             {activeTab === 'payments' && <PaymentTab user={user} />}
             {activeTab === 'chats' && (
                 <ComplaintsView
@@ -893,8 +893,7 @@ const DashboardView = ({ user, student, application, complaints, notices, naviga
                     </div>
 
                     {student?.refundPayment?.paymentStatus === 'Approved' && (
-                        <div className="mt-4 p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-[2rem] text-emerald-700 dark:text-emerald-400 font-bold text-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-700">
-                            <span className="text-2xl"></span>
+                        <div className="mt-4 p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-[2rem] text-emerald-700 dark:text-emerald-400 font-bold text-sm flex items-center justify-center text-center gap-3 animate-in fade-in slide-in-from-top-2 duration-700">
                             <span>Refundable is successful. Check your bank account!</span>
                         </div>
                     )}
@@ -2374,8 +2373,7 @@ const ClearanceView = ({ user, allocation, application, clearance, onRefresh }) 
                 {/* Info Display */}
                 <div className="p-8 space-y-8">
                     {clearance.status === 'Approved' && (
-                        <div className="p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-[2rem] text-emerald-700 dark:text-emerald-400 font-bold text-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-700">
-                            <span className="text-2xl"></span>
+                        <div className="p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-[2rem] text-emerald-700 dark:text-emerald-400 font-bold text-sm flex items-center justify-center text-center gap-3 animate-in fade-in slide-in-from-top-2 duration-700">
                             <span>Refundable is successful. Check your bank account!</span>
                         </div>
                     )}

@@ -513,17 +513,124 @@ exports.getUniqueDegrees = async (req, res) => {
 // GET current student's allocation
 exports.getMyAllocation = async (req, res) => {
     try {
-        // Find allocation by student ID or email
-        // Based on createAllocation, we use studentPayment._id (which is saved in allocation.student)
-        // However, User model has studentId or we can use email match.
-        // Let's try email match first as it's reliable across collections.
-        const allocation = await Allocation.findOne({ studentEmail: req.user.email });
-        
-        if (!allocation) {
-            return res.status(404).json({ success: false, message: 'No allocation found for this student' });
+        const escapeRegExp = (str) => (str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        const userId = req.user._id || req.user.id;
+        const userEmail = (req.user.email || '').trim();
+        const userStudentId = (req.user.studentId || req.user.rollNumber || '').trim();
+
+        // 1. Find StudentPayment record if exists
+        const payment = await StudentPayment.findOne({
+            $or: [
+                { student: userId },
+                ...(userEmail ? [{ email: { $regex: new RegExp(`^${escapeRegExp(userEmail)}$`, 'i') } }] : []),
+                ...(userStudentId ? [{ rollNumber: { $regex: new RegExp(`^${escapeRegExp(userStudentId)}$`, 'i') } }] : [])
+            ]
+        }).lean();
+
+        // 2. Find Application record if exists
+        const app = await Application.findOne({
+            $or: [
+                { student: userId },
+                ...(userEmail ? [{ studentEmail: { $regex: new RegExp(`^${escapeRegExp(userEmail)}$`, 'i') } }] : []),
+                ...(userStudentId ? [{ studentRollNumber: { $regex: new RegExp(`^${escapeRegExp(userStudentId)}$`, 'i') } }] : [])
+            ]
+        }).lean();
+
+        // 3. Query Allocation collection with all possible criteria
+        const allocQuery = [];
+        if (userId) allocQuery.push({ student: userId });
+        if (payment?._id) allocQuery.push({ student: payment._id });
+        if (app?.student) allocQuery.push({ student: app.student });
+
+        if (userEmail) allocQuery.push({ studentEmail: { $regex: new RegExp(`^${escapeRegExp(userEmail)}$`, 'i') } });
+        if (payment?.email) allocQuery.push({ studentEmail: { $regex: new RegExp(`^${escapeRegExp(payment.email)}$`, 'i') } });
+        if (app?.studentEmail) allocQuery.push({ studentEmail: { $regex: new RegExp(`^${escapeRegExp(app.studentEmail)}$`, 'i') } });
+
+        if (userStudentId) allocQuery.push({ studentRollNumber: { $regex: new RegExp(`^${escapeRegExp(userStudentId)}$`, 'i') } });
+        if (payment?.rollNumber) allocQuery.push({ studentRollNumber: { $regex: new RegExp(`^${escapeRegExp(payment.rollNumber)}$`, 'i') } });
+        if (app?.studentRollNumber) allocQuery.push({ studentRollNumber: { $regex: new RegExp(`^${escapeRegExp(app.studentRollNumber)}$`, 'i') } });
+
+        let allocation = null;
+        if (allocQuery.length > 0) {
+            allocation = await Allocation.findOne({ $or: allocQuery }).lean();
         }
+
+        // 4. If Allocation document is found, return it
+        if (allocation) {
+            return res.json({ success: true, data: allocation });
+        }
+
+        // 5. If no Allocation document found, check if student has an assigned room via Application or occupied Room bed
+        const isAppAllocated = app && (app.assignedRoom || ['Room Allocated', 'Activated'].includes(app.applicationStatus));
         
-        res.json({ success: true, data: allocation });
+        const mongoose = require('mongoose');
+        const studentIds = [];
+        [userId, payment?._id, payment?.student, app?.student].filter(Boolean).forEach(id => {
+            studentIds.push(String(id));
+            if (mongoose.Types.ObjectId.isValid(id)) {
+                try { studentIds.push(new mongoose.Types.ObjectId(id)); } catch (_) {}
+            }
+        });
+
+        let occupiedRoom = null;
+        let occupiedBed = null;
+        if (studentIds.length > 0) {
+            occupiedRoom = await Room.findOne({ 'beds.student': { $in: studentIds } }).populate('floor').lean();
+            if (occupiedRoom) {
+                occupiedBed = occupiedRoom.beds.find(b => studentIds.some(id => String(b.student) === String(id)));
+            }
+        }
+
+        if (isAppAllocated || occupiedRoom) {
+            if (!occupiedRoom && app?.assignedRoom) {
+                const roomNumStr = app.assignedRoom.replace(/\D/g, '');
+                const roomNum = parseInt(roomNumStr, 10);
+                const wing = app.studentWing || ((app.assignedRoom || '').toUpperCase().startsWith('F') ? 'female' : 'male');
+                if (!isNaN(roomNum)) {
+                    occupiedRoom = await Room.findOne({ roomnumber: roomNum, wing }).populate('floor').lean();
+                    if (occupiedRoom) {
+                        occupiedBed = occupiedRoom.beds.find(b => b.isOccupied) || occupiedRoom.beds[0];
+                    }
+                }
+            }
+
+            const roomnumber = occupiedRoom ? occupiedRoom.roomnumber : parseInt(app?.assignedRoom?.replace(/\D/g, '') || '1', 10);
+            const wing = occupiedRoom ? occupiedRoom.wing : (app?.studentWing || payment?.wing || 'male');
+            const floorNumber = occupiedRoom ? (occupiedRoom.floor?.floorNumber || occupiedRoom.floorNumber || 1) : 1;
+            const roomType = occupiedRoom ? occupiedRoom.type : (app?.roomType || 'single');
+            const bedId = occupiedBed ? occupiedBed.bedId : 'B1';
+            const rollNum = app?.studentRollNumber || payment?.rollNumber || userStudentId || 'N/A';
+            const name = app?.studentName || payment?.studentName || req.user.name;
+            const email = app?.studentEmail || payment?.email || userEmail;
+
+            const syntheticAlloc = {
+                student: payment?._id || userId,
+                studentRollNumber: rollNum,
+                studentName: name,
+                studentEmail: email,
+                studentDegree: app?.studentDegree || 'N/A',
+                studentYear: app?.studentYear || 0,
+                studentWing: wing,
+                paymentStatus: 'success',
+                room: occupiedRoom ? occupiedRoom._id : null,
+                floorNumber,
+                roomnumber,
+                roomType,
+                bedId,
+                wing,
+                allocatedBy: 'System'
+            };
+
+            try {
+                const created = await Allocation.create(syntheticAlloc);
+                return res.json({ success: true, data: created.toObject ? created.toObject() : created });
+            } catch (_) {
+                return res.json({ success: true, data: syntheticAlloc });
+            }
+        }
+
+        return res.status(404).json({ success: false, message: 'No allocation found for this student' });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }

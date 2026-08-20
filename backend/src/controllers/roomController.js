@@ -269,11 +269,10 @@ exports.updateBedGood = async (req, res) => {
     }
 };
 
-// POST migrate — "Group-and-Squash" Existing Data into Room-Centric Arrays
+// POST migrate — "Group-and-Squash" & "Self-Heal/Backfill Keys" Existing Data into Room-Centric Arrays
 // supports { roomId } in body to migrate only ONE room for specialized fixes
 exports.migrateGoods = async (req, res) => {
     try {
-        const Resource = require('../models/Resource');
         const { roomId } = req.body;
         
         const filter = roomId ? { _id: roomId } : {};
@@ -282,7 +281,10 @@ exports.migrateGoods = async (req, res) => {
         let totalItemsMerged = 0;
 
         for (const room of rooms) {
-            // A. Fetch all existing individual items for this room (legacy format)
+            // Find if there is an existing room resource document
+            let resDoc = await Resource.findOne({ roomId: room._id, category: 'ROOM_GOOD' });
+            
+            // A. Fetch all existing legacy flat/individual items for this room (if any exist)
             const flatGoods = await Resource.find({ 
                 roomId: room._id, 
                 category: 'ROOM_GOOD', 
@@ -292,20 +294,48 @@ exports.migrateGoods = async (req, res) => {
                 ]
             }).lean();
 
+            let roomItems = [];
+            let isModified = false;
+
             if (flatGoods.length > 0) {
-                // B. Group them into the new array format
-                const roomItems = flatGoods.map(g => ({
+                // If there are legacy individual items, convert them to the array format
+                roomItems = flatGoods.map(g => ({
                     bedId: g.bedId,
                     itemType: g.itemType || g.type,
                     uniqueCode: g.uniqueCode,
                     status: g.status || 'AVAILABLE'
                 }));
+                totalItemsMerged += flatGoods.length;
+                isModified = true;
 
-                // C. Create/Replace with a SINGLE room furniture document
-                // First, delete any EXISTING array documents for this room to avoid conflicts
-                await Resource.deleteMany({ roomId: room._id, items: { $exists: true } });
-                
-                await Resource.create({
+                // Cleanup flat documents
+                await Resource.deleteMany({ _id: { $in: flatGoods.map(g => g._id) } });
+            } else if (resDoc) {
+                // If the array document already exists, load existing items
+                roomItems = resDoc.items || [];
+            }
+
+            // B. Self-Heal & Backfill missing items: Ensure each bed has exactly the 6 required types
+            const requiredTypes = ['CHAIR', 'CUPBOARD', 'TABLE', 'CUPBOARD_KEY', 'TABLE_KEY_1', 'TABLE_KEY_2'];
+            for (const bed of room.beds) {
+                for (const type of requiredTypes) {
+                    const hasItem = roomItems.some(item => item.bedId === bed.bedId && item.itemType === type);
+                    if (!hasItem) {
+                        roomItems.push({
+                            bedId: bed.bedId,
+                            itemType: type,
+                            uniqueCode: null,
+                            status: 'AVAILABLE'
+                        });
+                        isModified = true;
+                    }
+                }
+            }
+
+            // C. Save or Create the single room resources document
+            if (!resDoc) {
+                // Create new
+                const newDoc = await Resource.create({
                     roomId: room._id,
                     roomRef: room.Roomid,
                     floorNumber: room.floorNumber,
@@ -313,30 +343,35 @@ exports.migrateGoods = async (req, res) => {
                     items: roomItems,
                     name: `Furniture — Room ${room.Roomid}`
                 });
-
-                // D. DELETE ALL the old individual documents
-                await Resource.deleteMany({ _id: { $in: flatGoods.map(g => g._id) } });
-                
+                resDoc = newDoc;
                 migratedRoomsCount++;
-                totalItemsMerged += flatGoods.length;
+            } else if (isModified) {
+                // Update existing
+                resDoc.items = roomItems;
+                await resDoc.save();
+                migratedRoomsCount++;
             }
 
-            // E. SCRUB: Unset the deleted top-level fields from any existing array documents
-            await Resource.updateMany(
-                { roomId: room._id, items: { $exists: true } },
-                { $unset: { bedId: "", itemType: "", uniqueCode: "" } }
-            );
+            // D. Clean up duplicate top-level array documents for this room if any exist
+            if (resDoc) {
+                await Resource.deleteMany({ 
+                    roomId: room._id, 
+                    category: 'ROOM_GOOD', 
+                    _id: { $ne: resDoc._id } 
+                });
+            }
         }
 
-        // F. Global Scrub for ANY legacy fields (Common resources, etc.)
-        await Resource.updateMany({}, { $unset: { bedId: "", itemType: "", uniqueCode: "" } });
+        // E. Scrub any top-level legacy fields from array documents globally
+        await Resource.updateMany(
+            { category: 'ROOM_GOOD', items: { $exists: true } }, 
+            { $unset: { bedId: "", itemType: "", uniqueCode: "", status: "" } }
+        );
 
         res.json({ 
-            message: `Migration successful.`, 
+            message: `Migration & Self-Healing successful.`, 
             roomsMigrated: migratedRoomsCount, 
-            totalItemsMerged,
-            newDocumentCount: migratedRoomsCount,
-            totalDeletions: totalItemsMerged
+            totalItemsMerged
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -102,7 +102,7 @@ const WardenScanRecords = () => {
             new Date(l.timestamp).toLocaleTimeString(),
             l.studentUserId?.name || 'N/A',
             l.studentId,
-            (l.isCurrentlyOutside ? 'OUTSIDE' : l.action).toUpperCase(),
+            (l.isCurrentlyOutside ? 'OUTSIDE' : (l.action || '')).toUpperCase(),
             l.destination || 'N/A',
             l.goingHome ? 'YES' : 'NO',
             l.isLate ? 'YES' : 'NO'

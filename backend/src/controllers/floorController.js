@@ -85,7 +85,7 @@ exports.createFloor = async (req, res) => {
 
             const furnitureItems = [];
             for (const bed of room.beds) {
-                for (const type of ['CHAIR', 'CUPBOARD', 'TABLE']) {
+                for (const type of ['CHAIR', 'CUPBOARD', 'TABLE', 'CUPBOARD_KEY', 'TABLE_KEY_1', 'TABLE_KEY_2']) {
                     furnitureItems.push({
                         bedId: bed.bedId,
                         itemType: type,
@@ -273,7 +273,7 @@ exports.createFloorsBulk = async (req, res) => {
 
                 const furnitureItems = [];
                 for (const bed of room.beds) {
-                    for (const type of ['CHAIR', 'CUPBOARD', 'TABLE']) {
+                    for (const type of ['CHAIR', 'CUPBOARD', 'TABLE', 'CUPBOARD_KEY', 'TABLE_KEY_1', 'TABLE_KEY_2']) {
                         furnitureItems.push({
                             bedId: bed.bedId,
                             itemType: type,

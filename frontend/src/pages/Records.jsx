@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
-import { HiOutlineDocumentArrowDown, HiOutlineFunnel, HiPencil, HiTrash, HiXMark, HiMagnifyingGlass, HiOutlineTableCells } from 'react-icons/hi2'
+import { HiOutlineDocumentArrowDown, HiOutlineFunnel, HiPencil, HiTrash, HiXMark, HiMagnifyingGlass, HiOutlineTableCells, HiOutlineEye } from 'react-icons/hi2'
 import ConfirmModal from '../components/ConfirmModal'
 
 // Format room number as M1/F1 based on wing
@@ -28,10 +28,61 @@ export default function Records() {
     const [selectedBedId, setSelectedBedId] = useState('')
     const [updating, setUpdating] = useState(false)
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, data: null, title: '', message: '', onConfirm: () => { } })
+
+    // View Modal State
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+    const [viewingApplication, setViewingApplication] = useState(null)
+    const [fetchingApp, setFetchingApp] = useState(false)
+    const [activeViewTab, setActiveViewTab] = useState('personal')
+
     useEffect(() => {
         loadAllocations()
         loadDegrees()
     }, [])
+
+    const openViewModal = async (allocation) => {
+        setIsViewModalOpen(true)
+        setViewingApplication(null)
+        setFetchingApp(true)
+        setActiveViewTab('personal')
+        try {
+            const apps = await api.getApplications({ search: allocation.studentRollNumber })
+            const fullApp = apps.find(a => a.studentRollNumber === allocation.studentRollNumber)
+            if (fullApp) {
+                setViewingApplication(fullApp)
+            } else {
+                toast.error('Detailed application record not found. Showing base allocation details.')
+                setViewingApplication({
+                    studentName: allocation.studentName,
+                    studentRollNumber: allocation.studentRollNumber,
+                    studentEmail: allocation.studentEmail,
+                    studentDegree: allocation.studentDegree || '',
+                    studentYear: allocation.studentYear || '1',
+                    studentWing: allocation.wing,
+                    roomType: allocation.roomType,
+                    assignedRoom: allocation.roomnumber,
+                    applicationStatus: allocation.paymentStatus === 'success' ? 'Activated' : 'Pending'
+                })
+            }
+        } catch (err) {
+            console.error('Failed to load student application details:', err)
+            toast.error('Failed to load student application details')
+            setViewingApplication({
+                studentName: allocation.studentName,
+                studentRollNumber: allocation.studentRollNumber,
+                studentEmail: allocation.studentEmail,
+                studentDegree: allocation.studentDegree || '',
+                studentYear: allocation.studentYear || '1',
+                studentWing: allocation.wing,
+                roomType: allocation.roomType,
+                assignedRoom: allocation.roomnumber,
+                applicationStatus: allocation.paymentStatus === 'success' ? 'Activated' : 'Pending'
+            })
+        } finally {
+            setFetchingApp(false)
+        }
+    }
+
 
     const loadDegrees = async () => {
         try {
@@ -280,8 +331,9 @@ export default function Records() {
                                     <td className="px-8 py-6 text-center text-[12px] font-bold text-slate-500 dark:text-slate-400">{new Date(a.allocatedAt).toLocaleDateString()}</td>
                                     <td className="px-8 py-6 text-right">
                                         <div className="flex justify-end gap-1.5">
-                                            <button className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-amber-500 hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center shadow-sm" onClick={() => openEditModal(a)}><HiPencil /></button>
-                                            <button className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-rose-500 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center shadow-sm" onClick={() => handleDelete(a._id, a.studentName)}><HiTrash /></button>
+                                            <button className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-indigo-500 hover:bg-indigo-500 hover:text-white transition-all flex items-center justify-center shadow-sm" title="View Profile & Application Details" onClick={() => openViewModal(a)}><HiOutlineEye /></button>
+                                            <button className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-amber-500 hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center shadow-sm" title="Edit Assignment" onClick={() => openEditModal(a)}><HiPencil /></button>
+                                            <button className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-rose-500 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center shadow-sm" title="Delete Allocation" onClick={() => handleDelete(a._id, a.studentName)}><HiTrash /></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -443,6 +495,236 @@ export default function Records() {
                 title={confirmModal.title}
                 message={confirmModal.message}
             />
+
+            {/* View Details Modal */}
+            {isViewModalOpen && (
+                <div className="modal-overlay" onClick={() => setIsViewModalOpen(false)}>
+                    <div className="modal max-w-4xl dark:bg-slate-900 border dark:border-slate-800" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header border-b border-slate-100 dark:border-slate-800 px-8 pb-4">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <HiOutlineEye className="text-indigo-500" /> Student Profile & Application Details
+                                </h3>
+                                <p className="text-xs text-slate-400 font-medium">Full information from the student's initial hostel application</p>
+                            </div>
+                            <button className="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors text-slate-400 dark:text-slate-500" onClick={() => setIsViewModalOpen(false)}><HiXMark className="text-xl" /></button>
+                        </div>
+
+                        <div className="modal-body p-8 space-y-6 max-h-[75vh] overflow-y-auto">
+                            {fetchingApp ? (
+                                <div className="py-20 flex flex-col items-center justify-center space-y-4">
+                                    <div className="w-12 h-12 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
+                                    <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 animate-pulse">Loading detailed application information...</p>
+                                </div>
+                            ) : viewingApplication ? (
+                                <>
+                                    {/* Quick Header Summary */}
+                                    <div className="flex flex-col sm:flex-row justify-between items-center bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 p-6 rounded-2xl gap-4">
+                                        <div className="text-center sm:text-left">
+                                            <div className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{viewingApplication.studentName}</div>
+                                            <div className="text-sm font-semibold text-indigo-500 dark:text-indigo-400 mt-1">{viewingApplication.studentRollNumber} · {viewingApplication.studentEmail}</div>
+                                        </div>
+                                        <div className="flex flex-col items-center sm:items-end gap-1.5">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Application Status</span>
+                                            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm ${
+                                                viewingApplication.applicationStatus === 'Activated' || viewingApplication.applicationStatus === 'Room Allocated'
+                                                    ? 'bg-emerald-500/10 text-emerald-600'
+                                                    : viewingApplication.applicationStatus === 'Rejected'
+                                                        ? 'bg-rose-500/10 text-rose-600'
+                                                        : 'bg-amber-500/10 text-amber-600'
+                                            }`}>
+                                                {viewingApplication.applicationStatus || 'Pending'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Tabs Selection Bar */}
+                                    <div className="flex border-b border-slate-100 dark:border-slate-800 scrollbar-none overflow-x-auto gap-2">
+                                        {[
+                                            { id: 'personal', label: 'Personal & Academic' },
+                                            { id: 'guardian', label: 'Guardian & Emergency' },
+                                            { id: 'medical', label: 'Medical Information' },
+                                            { id: 'preferences', label: 'Preferences & Docs' }
+                                        ].map(t => (
+                                            <button
+                                                key={t.id}
+                                                onClick={() => setActiveViewTab(t.id)}
+                                                className={`px-4 py-3 font-bold text-xs uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                                                    activeViewTab === t.id
+                                                        ? 'border-indigo-500 text-indigo-500 dark:text-indigo-400'
+                                                        : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                                                }`}
+                                            >
+                                                {t.label}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Tab Contents */}
+                                    <div className="pt-2 animate-fade-in text-left">
+                                        {activeViewTab === 'personal' && (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                {[
+                                                    ['Full Name', viewingApplication.studentName || '—'],
+                                                    ['Roll / ID Number', viewingApplication.studentRollNumber || '—'],
+                                                    ['SLIIT Email', viewingApplication.studentEmail || '—'],
+                                                    ['NIC / Passport', viewingApplication.nic || '—'],
+                                                    ['Gender', viewingApplication.gender ? (viewingApplication.gender.charAt(0).toUpperCase() + viewingApplication.gender.slice(1)) : '—'],
+                                                    ['Date of Birth', viewingApplication.dateOfBirth ? new Date(viewingApplication.dateOfBirth).toLocaleDateString() : '—'],
+                                                    ['Contact Number', viewingApplication.contactNumber || '—'],
+                                                    ['Permanent Address', viewingApplication.permanentAddress || '—', true],
+                                                    ['Faculty', viewingApplication.faculty || '—'],
+                                                    ['Registration Number', viewingApplication.registrationNumber || '—'],
+                                                    ['Degree Programme', viewingApplication.studentDegree || '—'],
+                                                    ['Year of Study', viewingApplication.studentYear ? `Year ${viewingApplication.studentYear}` : '—']
+                                                ].map(([label, val, fullWidth]) => (
+                                                    <div key={label} className={`p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col gap-1 ${fullWidth ? 'sm:col-span-2' : ''}`}>
+                                                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</span>
+                                                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{val}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {activeViewTab === 'guardian' && (
+                                            <div className="space-y-6">
+                                                {/* Guardian Section */}
+                                                <div>
+                                                    <h4 className="text-xs font-black uppercase tracking-widest text-indigo-500 mb-3">Guardian Information</h4>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                        {[
+                                                            ['Guardian Name', viewingApplication.guardianName || '—'],
+                                                            ['Guardian Contact Number', viewingApplication.guardianContactNumber || '—']
+                                                        ].map(([label, val]) => (
+                                                            <div key={label} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col gap-1">
+                                                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</span>
+                                                                <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{val}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {/* Emergency Contact */}
+                                                <div>
+                                                    <h4 className="text-xs font-black uppercase tracking-widest text-rose-500 mb-3">Emergency Contact Details</h4>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                        {[
+                                                            ['Emergency Contact Name', viewingApplication.emergencyContactName || '—'],
+                                                            ['Emergency Contact Phone', viewingApplication.emergencyContactPhone || '—']
+                                                        ].map(([label, val]) => (
+                                                            <div key={label} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col gap-1">
+                                                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</span>
+                                                                <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{val}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {activeViewTab === 'medical' && (
+                                            <div className="space-y-6">
+                                                {/* Medical condition status */}
+                                                <div className="p-5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Medical Condition Declarations</span>
+                                                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                                                            Does the student have any medical conditions?
+                                                        </span>
+                                                    </div>
+                                                    <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                                                        viewingApplication.hasMedicalCondition 
+                                                            ? 'bg-rose-500/10 text-rose-600' 
+                                                            : 'bg-emerald-500/10 text-emerald-600'
+                                                    }`}>
+                                                        {viewingApplication.hasMedicalCondition ? 'YES' : 'NO'}
+                                                    </span>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 gap-4">
+                                                    {[
+                                                        ['Condition Details', viewingApplication.medicalConditionDetails || 'No medical conditions declared.'],
+                                                        ['Allergies', viewingApplication.allergies || 'No specific allergies declared.'],
+                                                        ['Regular Medications', viewingApplication.regularMedications || 'No regular medications declared.'],
+                                                        ['Additional Medical Info', viewingApplication.medicalInfo || 'No additional medical info provided.']
+                                                    ].map(([label, val]) => (
+                                                        <div key={label} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col gap-1 flex-1">
+                                                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</span>
+                                                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{val}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                {/* Medical Report PDF Link */}
+                                                {viewingApplication.medicalReportUrl && (
+                                                    <div className="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 flex flex-col sm:flex-row justify-between items-center gap-3">
+                                                        <div className="text-left">
+                                                            <div className="text-xs font-bold text-indigo-900 dark:text-indigo-300">Medical Report Attachment</div>
+                                                            <div className="text-[10px] text-indigo-500 dark:text-indigo-400 mt-0.5">Click to view the student's uploaded medical records document</div>
+                                                        </div>
+                                                        <a 
+                                                            href={viewingApplication.medicalReportUrl} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="btn btn-primary btn-sm whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 text-white border-none py-2 px-4 rounded-lg font-bold text-xs uppercase"
+                                                        >
+                                                            View Document
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {activeViewTab === 'preferences' && (
+                                            <div className="space-y-6">
+                                                {/* Preference details */}
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    {[
+                                                        ['Preferred Hostel', viewingApplication.preferredHostel || '—'],
+                                                        ['Student Wing', viewingApplication.studentWing ? (viewingApplication.studentWing.toUpperCase() + ' Wing') : '—'],
+                                                        ['Preferred Room Type', viewingApplication.roomType ? (viewingApplication.roomType.charAt(0).toUpperCase() + viewingApplication.roomType.slice(1)) : '—'],
+                                                        ['Duration of Stay', viewingApplication.durationOfStay ? `${viewingApplication.durationOfStay} Months` : '—'],
+                                                        ['Assigned Room (From DB)', viewingApplication.assignedRoom || '—']
+                                                    ].map(([label, val]) => (
+                                                        <div key={label} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col gap-1">
+                                                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</span>
+                                                            <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{val}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                {/* Payment Slip Image Link */}
+                                                {viewingApplication.paymentSlipUrl && (
+                                                    <div className="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 flex flex-col sm:flex-row justify-between items-center gap-3">
+                                                        <div className="text-left">
+                                                            <div className="text-xs font-bold text-indigo-900 dark:text-indigo-300">Hostel Fee Payment Slip</div>
+                                                            <div className="text-[10px] text-indigo-500 dark:text-indigo-400 mt-0.5">Click to view/download the student's initial registration payment proof</div>
+                                                        </div>
+                                                        <a 
+                                                            href={viewingApplication.paymentSlipUrl} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="btn btn-primary btn-sm whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 text-white border-none py-2 px-4 rounded-lg font-bold text-xs uppercase"
+                                                        >
+                                                            View Payment Slip
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="py-20 text-center text-slate-400 font-semibold">No details could be displayed. Please try again.</div>
+                            )}
+                        </div>
+
+                        <div className="modal-footer border-t border-slate-100 dark:border-slate-800 px-8 pt-4">
+                            <button className="btn btn-ghost h-12 px-6 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 dark:text-white" onClick={() => setIsViewModalOpen(false)}>Close Profile</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

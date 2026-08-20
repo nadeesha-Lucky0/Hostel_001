@@ -24,7 +24,7 @@ const resourceSchema = new mongoose.Schema(
     items: [
       {
         bedId: { type: String, enum: ['A', 'B'], required: true },
-        itemType: { type: String, enum: ['CHAIR', 'CUPBOARD', 'TABLE'], required: true },
+        itemType: { type: String, enum: ['CHAIR', 'CUPBOARD', 'TABLE', 'CUPBOARD_KEY', 'TABLE_KEY_1', 'TABLE_KEY_2'], required: true },
         uniqueCode: { type: String, default: null },
         status: {
           type: String,

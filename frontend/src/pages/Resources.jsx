@@ -226,8 +226,8 @@ function RoomDetailModal({ room: initialRoom, floorActive, onClose }) {
                 const checkBedsNeedRepair = data.beds.some(b => {
                     const furniture = b.goods || [];
                     const types = furniture.map(f => f.itemType || f.type);
-                    // Needs repair if not exactly 3 items OR contains 'BED' OR has duplicates
-                    return types.length !== 3 || types.includes('BED') || new Set(types).size !== types.length;
+                    // Needs repair if not exactly 6 items OR contains 'BED' OR has duplicates
+                    return types.length !== 6 || types.includes('BED') || new Set(types).size !== types.length;
                 });
 
                 if (checkBedsNeedRepair) {
@@ -280,17 +280,20 @@ function RoomDetailModal({ room: initialRoom, floorActive, onClose }) {
         CHAIR: 'Chair',
         CUPBOARD: 'Cupboard',
         TABLE: 'Table',
-        BED: 'Bed'
+        BED: 'Bed',
+        CUPBOARD_KEY: 'Cupboard Key',
+        TABLE_KEY_1: 'Table Key 1',
+        TABLE_KEY_2: 'Table Key 2'
     };
 
-    const GoodRow = ({ good, onChange, disabled }) => (
-        <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-            <span className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider w-20 shrink-0 text-center truncate">
+    const GoodRow = ({ good, onChange, disabled, isNested }) => (
+        <div className={`flex items-center gap-4 transition-all ${isNested ? 'ml-6 pl-4 border-l-2 border-dashed border-indigo-500/20 bg-transparent py-1' : 'p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60'}`}>
+            <span className={`text-[11px] font-black uppercase tracking-wider w-28 shrink-0 text-left truncate ${isNested ? 'text-indigo-500 dark:text-indigo-400 font-bold' : 'text-slate-700 dark:text-slate-300'}`}>
                 {goodTypeLabel[good.type] || good.itemType || good.type || 'Item'}
             </span>
             <input
-                className="form-input !py-2 !text-xs font-mono flex-1 min-w-0 text-center focus:!ring-indigo-500 focus:!border-indigo-500"
-                placeholder="Enter code..."
+                className={`form-input !py-1.5 !text-xs font-mono flex-1 min-w-0 text-center focus:!ring-indigo-500 focus:!border-indigo-500 ${isNested ? '!bg-white/50 dark:!bg-slate-900/30' : ''}`}
+                placeholder={isNested ? "Key code..." : "Enter code..."}
                 defaultValue={good.uniqueCode || ''}
                 disabled={disabled || saving === good._id}
                 onBlur={e => {
@@ -351,17 +354,68 @@ function RoomDetailModal({ room: initialRoom, floorActive, onClose }) {
                                             <span className="text-[10px] text-slate-400 font-bold uppercase bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg">Vacant</span>
                                         )}
                                     </div>
-                                    {/* Bed-level goods: Bed, Cupboard, Chair */}
-                                    <div className="space-y-2">
-                                    {bed.goods && bed.goods.map(good => (
-                                        <GoodRow
-                                            key={good._id}
-                                            good={good}
-                                            onChange={(goodId, field, value) => handleBedGoodChange(bed.bedId, goodId, field, value)}
-                                            disabled={!floorActive}
-                                        />
-                                    ))}
-                                    </div>
+                                    {/* Bed-level goods: Simple vertical list with nested cupboard & table keys */}
+                                    {(() => {
+                                        const goods = bed.goods || [];
+                                        const chair = goods.find(g => (g.type || g.itemType) === 'CHAIR');
+                                        const cupboard = goods.find(g => (g.type || g.itemType) === 'CUPBOARD');
+                                        const cupboardKey = goods.find(g => (g.type || g.itemType) === 'CUPBOARD_KEY');
+                                        const table = goods.find(g => (g.type || g.itemType) === 'TABLE');
+                                        const tableKey1 = goods.find(g => (g.type || g.itemType) === 'TABLE_KEY_1');
+                                        const tableKey2 = goods.find(g => (g.type || g.itemType) === 'TABLE_KEY_2');
+
+                                        return (
+                                            <div className="space-y-2">
+                                                {chair && (
+                                                    <GoodRow
+                                                        good={chair}
+                                                        onChange={(goodId, field, value) => handleBedGoodChange(bed.bedId, goodId, field, value)}
+                                                        disabled={!floorActive}
+                                                    />
+                                                )}
+
+                                                {cupboard && (
+                                                    <GoodRow
+                                                        good={cupboard}
+                                                        onChange={(goodId, field, value) => handleBedGoodChange(bed.bedId, goodId, field, value)}
+                                                        disabled={!floorActive}
+                                                    />
+                                                )}
+                                                {cupboardKey && (
+                                                    <GoodRow
+                                                        good={cupboardKey}
+                                                        onChange={(goodId, field, value) => handleBedGoodChange(bed.bedId, goodId, field, value)}
+                                                        disabled={!floorActive}
+                                                        isNested={true}
+                                                    />
+                                                )}
+
+                                                {table && (
+                                                    <GoodRow
+                                                        good={table}
+                                                        onChange={(goodId, field, value) => handleBedGoodChange(bed.bedId, goodId, field, value)}
+                                                        disabled={!floorActive}
+                                                    />
+                                                )}
+                                                {tableKey1 && (
+                                                    <GoodRow
+                                                        good={tableKey1}
+                                                        onChange={(goodId, field, value) => handleBedGoodChange(bed.bedId, goodId, field, value)}
+                                                        disabled={!floorActive}
+                                                        isNested={true}
+                                                    />
+                                                )}
+                                                {tableKey2 && (
+                                                    <GoodRow
+                                                        good={tableKey2}
+                                                        onChange={(goodId, field, value) => handleBedGoodChange(bed.bedId, goodId, field, value)}
+                                                        disabled={!floorActive}
+                                                        isNested={true}
+                                                    />
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             ))}
                         </>
